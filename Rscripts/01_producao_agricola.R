@@ -30,38 +30,10 @@ prod.agro <- prod.agro %>%
              group_by(cod_muni,muni) %>% 
              summarise(across(everything(), list(sum))) %>% 
              mutate(valor_producao = arroz_em_casca_1 + milho_em_grao_1 + soja_em_grao_1) %>% 
-             dplyr::filter(valor_producao>0) 
+             dplyr::filter(valor_producao > 0 &
+             cod_muni %in% cidades.amazonia.legal) 
 
-
-# até aqui ok! Esperando resposta sobre função com R
-# CLASSIFICAR E FILTRAR APENAS AQUELAS DA AMAZONIA LEGAL!
-
-
-summary(prod.agro$valor_producao) # aqui eu mostro as estatísticas básicas, como os quartis
-round(quantile(prod.agro$valor_producao, probs = seq(0, 1, 1/10),na.rm = TRUE),2) # ver decis
-
-# Agora eu vou usar variáveis para armazenar o primeiro quartil, o terceiro quartil e a mediana.
-q1 <- as.vector(summary(prod.agro$valor_producao)[2])
-mediana <- as.vector(summary(prod.agro$valor_producao)[3])
-q3 <- as.vector(summary(prod.agro$valor_producao)[5])
-
-# armazenar o primeiro e o último decil
-x <- quantile(prod.agro$valor_producao, probs = seq(0, 1, 1/10),na.rm = TRUE) 
-round(x, 5) # ver os decis 
-
-# armazenar o primeiro (10%) e o último decil (90%)
-dec1 <- as.vector(round(x, 5)[2])
-dec9 <- as.vector(round(x, 5)[10])
-
-
-prod.agro <- prod.agro %>% 
-  mutate(class_valor_producao = case_when(valor_producao <= dec1 ~ 'Muito Baixo',  # muito baixo 10% (primeiro decil)
-                                          valor_producao <=  q1 ~ 'Baixo',         # baixo entre 10% e 25%
-                                          valor_producao <= mediana ~ 'Médio Baixo',    # médio-baixo entre 25% e 50%
-                                          valor_producao <= q3 ~ 'Médio Alto',     # médio-alto entre 50% e 75%
-                                          valor_producao <= dec9 ~ 'Alto',         # alto entre entre 75% e 90%
-                                          valor_producao > dec9 ~ 'Muito Alto'))   # muito alto acima de 90% (último decil)
-
+prod.agro <- classificar.variavel(prod.agro,'valor_producao','class_valor_producao')
 
 # teste para ver quantos itens existem em cada categoria
 x <- prod.agro %>% 
@@ -69,37 +41,13 @@ x <- prod.agro %>%
   mutate(N_category = n()) %>%
   count(N_category)
 
-
-
-cidades.inter <- prod.agro %>% 
-                 dplyr::filter(cod_muni %in% cod.cidades) %>% 
-                 arrange(desc(valor_producao)) 
-
 # Lembrar que valores estão em mil reais
+prod.agro$cod_muni <- as.numeric(prod.agro$cod_muni)
+prod.agro <- full_join(prod.agro,cidades.amazonia.legal.nome)
 
 
-# produtividade
-area <- read_excel('Input/tabela6771-area-estab-agro.xlsx') %>% 
-        dplyr::filter(area_estab_agro_hecta > 0) %>% 
-        select(1,3)
+inter <- prod.agro %>% 
+         dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
-prod.agro <- left_join(prod.agro,area,by=c('cod_muni' = 'cod_muni'))
-
-prod.agro <- prod.agro %>% 
-             mutate(valor_prod_por_hectare = valor_producao/area_estab_agro_hecta) 
-            
-prod.agro$valor_prod_por_hectare <- round(prod.agro$valor_prod_por_hectare,2)
-             
-
-
-
-
-
-#calcular a produtividade por área plantada, comparar classificação das intermediadoras
-# para ver se mantém (agro é )
-
-
-
-
-
-
+# Exportar arquivo
+write.csv(prod.agro,file='Outputs/01_tabelas/01_producao_agro.csv',na = '0')

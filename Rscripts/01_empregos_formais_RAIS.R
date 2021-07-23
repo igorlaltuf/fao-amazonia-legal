@@ -1,4 +1,4 @@
-# Dados de empregos formais da RAIS
+# Dados de empregos formais da RAIS na Amazônia Legal
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')
@@ -10,7 +10,7 @@ load_dot_env()
 credencial <- Sys.getenv('CREDENCIAL_BASE_DOS_DADOS')
 basedosdados::set_billing_id(credencial)   
 
-# 1 - ENERGIA ##############################
+# 1 - ENERGIA ElÉTRICA ##############################
 
 # Total de vínculos ativos da RAIS em 31-12-2019 por município de acordo com a CNAE 2.0
 query <- "SELECT id_municipio, ano, cnae_2, SUM(numero_vinculos) as vinculos_ativos FROM `basedosdados.br_me_rais.agregado_vinculos_municipio_vinculo_ativo_cbo_cnae_natureza_juridica_idade_sexo_raca`
@@ -38,18 +38,15 @@ cnae.energia <- cnae.cidades %>%
                 summarise(empregos_energia = sum(vinculos_ativos, na.rm = TRUE))
 
 cnae.energia <- left_join(cidades.brasil.nome,cnae.energia,by=c("cod_muni" = "id_municipio")) %>% 
-                dplyr::filter(empregos_energia>0)
+                dplyr::filter(empregos_energia > 0 &
+                cod_muni %in% cidades.amazonia.legal) %>% 
+                arrange(desc(empregos_energia))
 
-
-#####################
-# classificar cnae.energia
-#####################
-
+# Classifica empregos de energia elétrica
+cnae.energia <- classificar.variavel(cnae.energia,'empregos_energia','class_empregos_energia')
 
 # 2 - MINERAÇÃO #################################
-
 # Vínculos ativos em 31-12-2019 por município e relacionados à mineração
-
 # códigos CNAE
 # 07 EXTRAÇÃO DE MINERAIS METÁLICOS
 # 08 EXTRAÇÃO DE MINERAIS NÃO-METÁLICOS
@@ -62,11 +59,12 @@ cnae.mineracao <- cnae.cidades %>%
                   summarise(empregos_mineracao = sum(vinculos_ativos, na.rm = TRUE))
 
 cnae.mineracao <- left_join(cidades.brasil.nome,cnae.mineracao,by=c("cod_muni" = "id_municipio")) %>% 
-                  dplyr::filter(empregos_mineracao>0)
+                  dplyr::filter(empregos_mineracao > 0 &
+                  cod_muni %in% cidades.amazonia.legal) %>% 
+                  arrange(desc(empregos_mineracao))
 
-#####################
-# classificar cnae.mineracao em alto, muito alto etc? 
-#####################
+# Classifica empregos de mineração
+cnae.mineracao <- classificar.variavel(cnae.mineracao,'empregos_mineracao','class_empregos_mineracao')
 
 
 # 3 - PETRÓLEO #################################
@@ -79,11 +77,12 @@ cnae.petroleo <- cnae.cidades %>%
                  summarise(empregos_petroleo = sum(vinculos_ativos, na.rm = TRUE))
 
 cnae.petroleo <- left_join(cidades.brasil.nome,cnae.petroleo,by=c("cod_muni" = "id_municipio")) %>% 
-  dplyr::filter(empregos_petroleo>0)
+                 dplyr::filter(empregos_petroleo>0 &
+                 cod_muni %in% cidades.amazonia.legal) %>% 
+                 arrange(desc(empregos_petroleo))
 
-#####################
-# classificar cnae.petroleo
-#####################
+# Classifica empregos de petróleo 
+cnae.petroleo <- classificar.variavel(cnae.petroleo,'empregos_petroleo','class_empregos_petroleo')
 
 
 # 4 - AGRO ######################################
@@ -94,20 +93,25 @@ cnae.agro <- cnae.cidades %>%
              summarise(empregos_agro = sum(vinculos_ativos, na.rm = TRUE))
 
 cnae.agro <- left_join(cidades.brasil.nome,cnae.agro,by=c("cod_muni" = "id_municipio")) %>% 
-  dplyr::filter(empregos_agro>0)
-            
-#####################
-# classificar cnae.petroleo
-#####################      
+             dplyr::filter(empregos_agro>0 &
+             cod_muni %in% cidades.amazonia.legal) %>% 
+             arrange(desc(empregos_agro))
+        
+# Classifica empregos do agro 
+cnae.agro <- classificar.variavel(cnae.agro,'empregos_agro','class_empregos_agro')
+
+
+  
 
 # 5 - Reunir os dataframes
 empregos.rais <- full_join(cnae.energia,cnae.petroleo)
 empregos.rais <- full_join(empregos.rais,cnae.mineracao)
 empregos.rais <- full_join(empregos.rais,cnae.agro)
+empregos.rais <- full_join(empregos.rais,cidades.amazonia.legal.nome)
 
-# filtrar por cidades da amazônia legal e as intermediadoras
-rais.amz.legal <- empregos.rais %>% 
-                  dplyr::filter(cod_muni %in% cidades.amazonia.legal) 
+# Salvar csv com dados da RAIS para os setores analisados e suas respectivas classificações
+write.csv(empregos.rais,file='Outputs/01_tabelas/01_empregos_rais.csv',na = '0')
 
+# filtrar por cidades intermediadoras
 rais.cidades.intermed <- empregos.rais %>% 
                          dplyr::filter(cod_muni %in% cidades.intermediadoras) 
