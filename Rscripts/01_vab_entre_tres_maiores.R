@@ -28,7 +28,7 @@ vab.cidades <- function(atividade.economica) {
 
 mun.agro <- vab.cidades(c('Agricultura',
                           'inclusive apoio à agricultura e a pós colheita',
-                          'Pecuária, inclusive apoio à pecuária'))
+                          'Pecuária, inclusive apoio à pecuária')) 
 
 mun.extrativistas <- vab.cidades('Indústrias extrativas')
 

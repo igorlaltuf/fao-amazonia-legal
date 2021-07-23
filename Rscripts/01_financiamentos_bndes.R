@@ -22,9 +22,9 @@ bndes.energia <- fin.bndes.deflac %>%
 
 bndes.energia.cidades <- bndes.energia %>% 
                          select(5,6,23) %>% 
-                         unique() 
+                         unique() %>% 
+                         dplyr::filter(cod_muni %in% cidades.amazonia.legal)
                          
-
 ### Continuar daqui!!! (juntar as cidades encontradas na descrição abaixo com as cidades da tabela acima e depois filtrar pela amazonia legal)
 
 amz.legal.uppercase <- mutate_all(cidades.amazonia.legal.nome, .funs=toupper) 

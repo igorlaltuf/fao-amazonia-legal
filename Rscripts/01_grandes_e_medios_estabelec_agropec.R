@@ -48,16 +48,26 @@ medias.propriedades <- medias.propriedades %>%
 medias.propriedades <- classificar.variavel(medias.propriedades,'total_medios_estab','class_total_medios_estab')
 
 # teste para ver quantos itens existem em cada categoria
-x <- grandes.propriedades %>% 
-  group_by(class_total_grandes_estab) %>%
+x <- medias.propriedades %>% 
+  group_by(class_total_medios_estab) %>%
   mutate(N_category = n()) %>%
   count(N_category)
 
-medios.e.grandes <- left_join(medias.propriedades,grandes.propriedades) %>% 
+medios.e.grandes <- full_join(medias.propriedades,grandes.propriedades) 
+medios.e.grandes$total_medios_estab[is.na(medios.e.grandes$total_medios_estab)] <- 0
+medios.e.grandes$total_grandes_estab[is.na(medios.e.grandes$total_grandes_estab)] <- 0
+
+medios.e.grandes <- medios.e.grandes %>% 
                     mutate(medios_e_grandes_estab = total_medios_estab + total_grandes_estab)
 medios.e.grandes <- classificar.variavel(medios.e.grandes,'medios_e_grandes_estab','class_medios_e_grandes_estab')
 
-medios.e.grandes <- full_join(cidades.amazonia.legal.nome,medios.e.grandes)
+x <- medios.e.grandes %>% 
+      group_by(class_medios_e_grandes_estab) %>%
+      mutate(N_category = n()) %>%
+      count(N_category)
+
+medios.e.grandes.inter <- full_join(cidades.amazonia.legal.nome,medios.e.grandes) %>% 
+                    dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
 # Salvar arquivo
 write.csv(medios.e.grandes,file='Outputs/01_tabelas/01_medios_e_grandes_estab_agropec.csv',na = '0')

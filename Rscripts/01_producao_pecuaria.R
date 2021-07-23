@@ -11,6 +11,8 @@ gado <- read_excel(path = 'Input/tabela3939-cabeca-de-gado.xlsx') %>%
 
 gado <- classificar.variavel(gado,'qtd_cabecas_de_gado_2019','class_gado_2019')
 
+gado.intermed <- gado %>% 
+         dplyr::filter(cod_muni %in% cidades.intermediadoras)
 # teste para ver quantos itens existem em cada categoria
 x <- gado %>% 
   group_by(class_gado_2019) %>%

@@ -17,7 +17,7 @@ empregos.agro.censo[5] <- round(empregos.agro.censo['perc_familiar_sobre_agro'],
 empregos.agro.censo <- classificar.variavel(empregos.agro.censo,'perc_familiar_sobre_agro','class_familiar_sobre_agro')
 
 # Exportar
-write.csv(empregos.agro.censo,file='Outputs/01_tabelas/01_emprego_agro_censo.csv',na = '0')
+write.csv(empregos.agro.censo,file = 'Outputs/01_tabelas/01_emprego_agro_censo.csv', na = '0')
 
 # Checar quantidades por faixa
 x <- empregos.agro.censo %>% 

@@ -23,4 +23,4 @@ classificar.variavel <- function(dataframe, variavel.analisada = NULL, nova.vari
       !!as.name(variavel.analisada) > decil[["90%"]] ~ "Muito Alto"))
       
     invisible(novo.dataframe)
-    }
+}

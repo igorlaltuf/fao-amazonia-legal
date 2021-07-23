@@ -59,7 +59,8 @@ royalties.cfem <- royalties %>%
                   dplyr::filter(royalties_cfem_mineracao > 0 &
                   cod_muni %in% cidades.amazonia.legal)
 
-royalties.cfem <- classificar.variavel(royalties.cfem,'royalties_cfem_mineracao','class_royalties_cfem_mineracao')
+royalties.cfem <- classificar.variavel(royalties.cfem,'royalties_cfem_mineracao','class_royalties_cfem_mineracao') %>% 
+                  dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
 
 # teste para ver quantos itens existem em cada categoria
