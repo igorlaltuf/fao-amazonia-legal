@@ -31,6 +31,7 @@ royalties.anp.petroleo <- royalties %>%
                 cod_muni %in% cidades.amazonia.legal)
 
 royalties.anp.petroleo <- classificar.variavel(royalties.anp.petroleo,'royalties_anp_petroleo','class_royalties_anp_petroleo')
+summary(royalties.anp.petroleo$royalties_anp_petroleo)
 
 # teste para ver quantos itens existem em cada categoria
 x <- royalties.anp.petroleo %>% 
@@ -59,8 +60,7 @@ royalties.cfem <- royalties %>%
                   dplyr::filter(royalties_cfem_mineracao > 0 &
                   cod_muni %in% cidades.amazonia.legal)
 
-royalties.cfem <- classificar.variavel(royalties.cfem,'royalties_cfem_mineracao','class_royalties_cfem_mineracao') %>% 
-                  dplyr::filter(cod_muni %in% cidades.intermediadoras)
+royalties.cfem <- classificar.variavel(royalties.cfem,'royalties_cfem_mineracao','class_royalties_cfem_mineracao') 
 
 
 # teste para ver quantos itens existem em cada categoria

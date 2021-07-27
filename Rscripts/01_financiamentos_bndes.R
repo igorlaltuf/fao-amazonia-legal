@@ -15,30 +15,46 @@ fin.bndes.deflac <- fin.bndes.original %>%
                     dplyr::filter(desembolso_deflac>=40000000 & 
                     porte_cliente == 'GRANDE' &
                     natureza_cliente == 'PRIVADA') #filtra os grandes investimentos (acima de R$ 40 milhões de 2021)
-                 
 
 bndes.energia <- fin.bndes.deflac %>% 
-                 filter(str_detect(nome_sub_setor_cnae, "^GERACAO DE ENERGIA ELETRICA"))
+                 filter(str_detect(nome_sub_setor_cnae, "^GERACAO DE ENERGIA ELETRICA - HIDRELETRICA")) 
 
+# Filtrar de acordo com o nome do município
 bndes.energia.cidades <- bndes.energia %>% 
                          select(5,6,23) %>% 
                          unique() %>% 
                          dplyr::filter(cod_muni %in% cidades.amazonia.legal)
-                         
-### Continuar daqui!!! (juntar as cidades encontradas na descrição abaixo com as cidades da tabela acima e depois filtrar pela amazonia legal)
 
+# Criar um DF com nomes em caixa alta e sem Ç
 amz.legal.uppercase <- mutate_all(cidades.amazonia.legal.nome, .funs=toupper) 
 amz.legal.uppercase$muni <- str_sub(amz.legal.uppercase$muni,1,nchar(amz.legal.uppercase$muni )-5)
-# Falta remover Ç,~,acentos,' etc e incluir no filtro abaixo:##### IMPORTANTE!
+nomes.amz.legal <- as.vector(amz.legal.uppercase$muni)
 
-# Como muitas delas estão categorizadas como "SEM MUNICÍPIO", vou checar se o nome das cidades está na descrição:
-intermed.descricao <- bndes.energia %>% 
-  dplyr::filter(muni == 'SEM MUNICÍPIO') %>% 
-  dplyr::filter(grepl('RIO BRANCO|ITACOATIARA|LABREA|MANACAPURU|PARINTINS|TABATINGA|TEFE|MACAPA
-                      |OIAPOQUE|BACABAL|CAXIAS|IMPERATRIZ|PRESIDENTE DUTRA|SANTA INES|BARRA DO GARCAS
-                      |CACERES|CUIABA|RONDONOPOLIS|SINOP|ALTAMIRA|BREVES|CASTANHAL|MARABA|REDENCAO
-                      |SANTAREM|ARIQUEMES|JI-PARANA|PORTO VELHO|BOA VISTA|RORAINOPOLIS|ARAGUAINA|GURUPI
-                      |PALMAS', descricao)) 
+# padronizar a descrição para ficar igual o campo dos municípios
+bndes.energia$descricao <- stri_trans_general(bndes.energia$descricao,"Latin-ASCII") # remove Ç
+
+# Filtrar de acordo com a descrição do projeto (quando o projeto for classificado como 'SEM MUNICÍPIO')
+energia.descricao <- bndes.energia %>% 
+                     dplyr::filter(cod_muni %in% c('9999999','0000000') & # codigo 'SEM MUNICIPIO' ou 'DIVERSOS'
+                                   uf %in% uf.amz.legal) %>% # Filtra UFs da Amazônia Legal, para o caso de existirem duas cidades com o mesmo nome
+                     filter(grepl(paste(nomes.amz.legal, collapse="|"), descricao)) # filtra cidades da AMZ LEGAL
+
+
+                    
+# REMOVER PHC do filtro acima via str_detect
+# Ver como retornar as cidades que aparecem acima!!!
+# Juntar com o df bndes energia cidades 
+
+
+
+# fazer o mesmo para mineração (transformar em função?)
+
+
+
+
+
+
+
 
 # Valor agrupado por município
 bndes.energia <- bndes.energia %>% 
@@ -50,18 +66,10 @@ bndes.energia <- bndes.energia %>%
 
 # 2 - FINANCIAMENTOS PARA MINERAÇÃO
 
-# REVISAR ESTE FILTRO DE MINERAÇÃO (perguntar para Luis)
 bndes.mineracao <- fin.bndes.deflac %>% 
-                   dplyr::filter(nome_sub_setor_cnae %in% c('EXT MIN COBRE CHMBO ZNCO OUTR MIN MET NAO-FERRO NAO ESPEC ANTER',
-                                                            'EXTRACAO DE MINERIO DE FERRO',
-                                                            'EXTRACAO DE MINERIO DE ALUMINIO',
-                                                            'BNFC MIN CBRE CHMBO ZNCO OUTR MIN MET NAO-FERRO NAO ESPEC ANTER',
-                                                            'EXTRACAO DE MINERIO DE NIQUEL',
-                                                            'BENEFICIAMENTO DE MINERIO DE ALUMINIO',
-                                                            'PELOTIZACAO, SINTERIZACAO OUTROS BENEF DE MINERIO DE FERRO',
-                                                            'EXTRACAO DE MINERAIS RADIOATIVOS'))
-                   
-
+  filter(str_detect(cod_sub_setor_cnae, "^B07")) # Filtrar categoria CNAE 2.0 pela divisão B07: Extração de minerais metálicos
+             
+ 
 # Por município
 bndes.mineracao <- bndes.mineracao %>% 
                     select(5,6,28) %>% 

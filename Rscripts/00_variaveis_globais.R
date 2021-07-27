@@ -14,3 +14,5 @@ cidades.intermediadoras <- c('1100023','1100122','1100205','1200401','1200203','
 
 em_milhoes <- 1000000
 em_bilhoes <- 1000000000
+
+uf.amz.legal <- c('AC','RR','AM','RO','PA','AP','MA','TO','MT')

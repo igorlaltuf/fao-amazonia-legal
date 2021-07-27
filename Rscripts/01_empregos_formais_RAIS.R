@@ -33,7 +33,7 @@ cnae.cidades$id_municipio <- as.numeric(cnae.cidades$id_municipio)
 
 cnae.energia <- cnae.cidades %>% 
                 select(id_municipio,cnae_2,vinculos_ativos) %>% 
-                filter(str_detect(cnae_2, "^351")) %>%  # filtrar coluna caracteres iniciados em 351
+                filter(str_detect(cnae_2, "^35115")) %>%  # filtrar coluna caracteres iniciados em 35115
                 group_by(id_municipio) %>% 
                 summarise(empregos_energia = sum(vinculos_ativos, na.rm = TRUE))
 
@@ -50,43 +50,39 @@ cnae.energia <- classificar.variavel(cnae.energia,'empregos_energia','class_empr
 cnae.energia.inter <- cnae.energia %>%
                 dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
-
 x <- cnae.energia %>% 
   group_by(class_empregos_energia) %>%
   mutate(N_category = n()) %>%
   count(N_category)
 
+
 # 2 - MINERAÇÃO #################################
 # Vínculos ativos em 31-12-2019 por município e relacionados à mineração
-# códigos CNAE
-# 07 EXTRAÇÃO DE MINERAIS METÁLICOS
-# 08 EXTRAÇÃO DE MINERAIS NÃO-METÁLICOS
-# 09 ATIVIDADES DE APOIO À EXTRAÇÃO DE MINERAIS
+# Códigos CNAE iniciados por B07: extração de minerais metálicos
 
 cnae.mineracao <- cnae.cidades %>% 
-                  select(id_municipio,cnae_2,vinculos_ativos) %>% 
-                  filter(str_detect(cnae_2, "^07|^08|^09")) %>% 
-                  group_by(id_municipio) %>% 
-                  summarise(empregos_mineracao = sum(vinculos_ativos, na.rm = TRUE))
+  select(id_municipio,cnae_2,vinculos_ativos) %>% 
+  filter(str_detect(cnae_2, "^07")) %>%  # filtrar coluna caracteres iniciados em B07
+  group_by(id_municipio) %>% 
+  summarise(empregos_mineracao = sum(vinculos_ativos, na.rm = TRUE))
 
 cnae.mineracao$empregos_mineracao <- as.numeric(cnae.mineracao$empregos_mineracao)
 
 cnae.mineracao <- left_join(cidades.amazonia.legal.nome,cnae.mineracao, by = c('cod_muni'='id_municipio')) %>% 
-                  dplyr::filter(empregos_mineracao > 0 &
-                  cod_muni %in% cidades.amazonia.legal) %>% 
-                  arrange(desc(empregos_mineracao))
+  dplyr::filter(empregos_mineracao > 0) %>% 
+  arrange(desc(empregos_mineracao))
 
-# Classifica empregos de mineração
+# Classifica empregos de energia elétrica
 cnae.mineracao <- classificar.variavel(cnae.mineracao,'empregos_mineracao','class_empregos_mineracao')
 
 cnae.mineracao.inter <- cnae.mineracao %>%
-                        dplyr::filter(cod_muni %in% cidades.intermediadoras)
-
+  dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
 x <- cnae.mineracao %>% 
   group_by(class_empregos_mineracao) %>%
   mutate(N_category = n()) %>%
   count(N_category)
+
 
 # 3 - PETRÓLEO #################################
 # código CNAE
@@ -113,11 +109,27 @@ x <- cnae.petroleo %>%
   count(N_category)
 
 # 4 - AGRO ######################################
+
+# COLOCAR NÚMERO DE VìNCULOS POR CONTA DAS SAFRAS QUE NÃO OCORREM EM 31-12
+# FALTA COLOCAR NÚMERO DE VÍNCULOS NA QUERY ABAIXO (ver como fica a classificação)
+query <- "SELECT id_municipio, ano, cnae_2, SUM(numero_vinculos) as vinculos FROM `basedosdados.br_me_rais.agregado_vinculos_municipio_vinculo_ativo_cbo_cnae_natureza_juridica_idade_sexo_raca`
+          WHERE ano = 2019
+          GROUP BY id_municipio, ano, cnae_2"
+
+cnae.cidades <- read_sql(query)
+which(is.na(cnae.cidades$vinculos)) # retorna a linha dos NAs caso existam
+cnae.cidades$id_municipio <- as.numeric(cnae.cidades$id_municipio)
+
+# Grupos da CNAE 2.0:
+# 01.1 Produção de lavouras temporárias
+# 01.5 Pecuária
+# 01.6 Atividades de apoio à agricultura e à pecuária; atividades de pós-colheita
+
 cnae.agro <- cnae.cidades %>% 
-             select(id_municipio,cnae_2,vinculos_ativos) %>% 
-             filter(str_detect(cnae_2, "^01|^02|^03")) %>%  
+             select(id_municipio,cnae_2,vinculos) %>% 
+             filter(str_detect(cnae_2, "^011|^015|^016")) %>%  
              group_by(id_municipio) %>% 
-             summarise(empregos_agro = sum(vinculos_ativos, na.rm = TRUE))
+             summarise(empregos_agro = sum(vinculos, na.rm = TRUE))
 
 cnae.agro$empregos_agro <- as.numeric(cnae.agro$empregos_agro)
 

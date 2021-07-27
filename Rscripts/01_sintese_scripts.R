@@ -13,5 +13,6 @@ source('Rscripts/01_producao_agricola.R')
 source('Rscripts/01_producao_pecuaria.R')
 source('Rscripts/01_royalties_municipios.R')
 source('Rscripts/01_vab_entre_tres_maiores.R')
+source('Rscripts/01_itr_classificacao.R')
 beep(sound = 3)
 rm(list=ls()) # limpar as variáveis carregadas

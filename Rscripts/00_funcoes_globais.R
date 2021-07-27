@@ -24,3 +24,14 @@ classificar.variavel <- function(dataframe, variavel.analisada = NULL, nova.vari
       
     invisible(novo.dataframe)
 }
+
+# 2 - Função que transforma valores alto e muito alto em 1
+pontuacao.criterio1 <- function(dataframe, variavel.analisada = NULL, nova.variavel = NULL) {
+  novo.dataframe <- dataframe %>%
+    mutate(nova.variavel = ifelse(dataframe$variavel.analisada %in% c('Alto','Muito Alto'), 1,0))
+  }
+
+  
+
+  
+  
