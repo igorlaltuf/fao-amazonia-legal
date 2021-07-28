@@ -39,61 +39,68 @@ energia.descricao <- bndes.energia %>%
                                    uf %in% uf.amz.legal) %>% # Filtra UFs da Amazônia Legal, para o caso de existirem duas cidades com o mesmo nome
                      filter(grepl(paste(nomes.amz.legal, collapse="|"), descricao)) # filtra cidades da AMZ LEGAL
 
+# criar um vetor com todos os nomes em um elemento e separar os elementos por |
+w <- paste(nomes.amz.legal, collapse = '|') 
+# colocar o nome do município na coluna sobre o município
+energia.descricao$muni <- str_extract(energia.descricao$descricao, w)      
 
+# Juntar essa tabela com a tabela das cidades.
+energia.descricao <- energia.descricao %>% 
+                     select(5,6,23) %>% 
+                     unique() 
+
+bndes.energia.cidades <- rbind(bndes.energia.cidades,energia.descricao)%>% 
+                         mutate(energia_bndes = 1)
                     
-# REMOVER PHC do filtro acima via str_detect
-# Ver como retornar as cidades que aparecem acima!!!
-# Juntar com o df bndes energia cidades 
-
-
-
-# fazer o mesmo para mineração (transformar em função?)
-
-
-
-
-
-
-
-
 # Valor agrupado por município
-bndes.energia <- bndes.energia %>% 
-                 select(5,6,28) %>% 
-                 group_by(muni,cod_muni) %>%
-                 summarise(desembolsos_energia_deflac = sum(desembolso_deflac)) %>% 
-                 arrange(desc(desembolsos_energia_deflac))
-
+valor.bndes.energia <- bndes.energia %>% 
+                       select(5,6,28) %>% 
+                       group_by(muni,cod_muni) %>%
+                       summarise(desembolsos_energia_deflac = sum(desembolso_deflac)) %>% 
+                       arrange(desc(desembolsos_energia_deflac))
 
 # 2 - FINANCIAMENTOS PARA MINERAÇÃO
-
 bndes.mineracao <- fin.bndes.deflac %>% 
-  filter(str_detect(cod_sub_setor_cnae, "^B07")) # Filtrar categoria CNAE 2.0 pela divisão B07: Extração de minerais metálicos
-             
- 
+                   filter(str_detect(cod_sub_setor_cnae, "^B07")) # Filtrar categoria CNAE 2.0 pela divisão B07: Extração de minerais metálicos
+
 # Por município
-bndes.mineracao <- bndes.mineracao %>% 
-                    select(5,6,28) %>% 
-                    group_by(muni,cod_muni) %>%
-                    summarise(desembolsos_mineracao_deflac = sum(desembolso_deflac)) %>% 
-                    arrange(desc(desembolsos_mineracao_deflac))
+bndes.mineracao.cidades <- bndes.mineracao %>% 
+                           select(5,6,23) %>%
+                           unique() %>% 
+                           dplyr::filter(cod_muni %in% cidades.amazonia.legal)
+                          
+# Verificar os projetos "SEM MUNICÍPIO"
+mineracao.descricao <- bndes.mineracao %>% 
+                       dplyr::filter(cod_muni %in% c('9999999','0000000') & # codigo 'SEM MUNICIPIO' ou 'DIVERSOS'
+                              uf %in% uf.amz.legal) %>% # Filtra UFs da Amazônia Legal, para o caso de existirem duas cidades com o mesmo nome
+                       filter(grepl(paste(nomes.amz.legal, collapse="|"), descricao)) # filtra cidades da AMZ LEGAL
 
+# colocar o nome do município na coluna sobre o município
+mineracao.descricao$muni <- str_extract(mineracao.descricao$descricao, w)
 
-# investigar pela descrição aquelas sem município
-# criar um df que reúne as classificações por descrição e município 
+# Juntar essa tabela com a tabela das cidades.
+mineracao.descricao <- mineracao.descricao %>% 
+                       select(5,6,23) %>% 
+                       unique() 
 
+bndes.mineracao.cidades <- rbind(bndes.mineracao.cidades,mineracao.descricao) %>% 
+                           mutate(mineracao_bndes = 1)
 
 # 3 - FINANCIAMENTOS PARA PETRÓLEO (não foram financiados grandes projetos na Amazonia Legal)
 bndes.petroleo <- fin.bndes.deflac %>% 
                   dplyr::filter(nome_sub_setor_cnae %in% 'EXTRACAO DE PETROLEO E GAS NATURAL')
 
+# Nenhum dos grandes projetos de petróleo foi na Amazônia Legal
 
 # Reunir dados
-grandes.projetos.bndes <- full_join(bndes.energia,bndes.mineracao)
+grandes.projetos.bndes <- full_join(bndes.energia.cidades,bndes.mineracao.cidades) 
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "PEDRA BRANCA DO AMAPARI" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '2310506'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "ALTAMIRA" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '1500602'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "SINOP" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '5107909'
 
-
-
+grandes.projetos.bndes <- grandes.projetos.bndes %>% 
+                          select(2,4,5) %>% 
+                          unique()
+                          
 # exportar tabela
-
-# Financiamentos nas cidades intermediadoras
-bndes.cidades.intermed <- grandes.projetos.bndes %>% 
-  dplyr::filter(cod_muni %in% cidades.intermediadoras) 
+write.csv(grandes.projetos.bndes,file='Outputs/01_tabelas/01_financ_bndes.csv')

@@ -1,3 +1,4 @@
+# Subconjunto da agropecuária
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')
