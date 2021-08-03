@@ -6,13 +6,44 @@ source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
 # Carregar tabelas output
-vab.energia <- read.csv('Outputs/01_tabelas/01_vab_energia_2017.csv')
 empregos.energia <- read.csv('Outputs/01_tabelas/01_empregos_rais.csv')
 royalties <- read.csv('Outputs/01_tabelas/01_royalties_mineracao_energia.csv')
 bndes <- read.csv('Outputs/01_tabelas/01_financ_bndes.csv') 
+vab.energia <- read.csv('Outputs/01_tabelas/01_vab_energia_2017.csv')
+
+# Empregos Energia
+empregos.rais.energia <- empregos.energia %>% 
+                         select(2:5) %>% 
+                         mutate(empregos_energia_rais = ifelse(empregos.energia$class_empregos_energia %in% c('Alto','Muito Alto'),1,0))
+
+# Royalties
+royalties.energia <- royalties %>% 
+                     select(2:5) %>% 
+                     mutate(royalties_energia_cfh = ifelse(royalties$class_royalties_cfh %in% c('Alto','Muito Alto'),1,0))
+
+# BNDES
+bndes.energia <- bndes %>% 
+                 select('cod_muni','energia_bndes')
+
+# VAB Energia elétrica
+vab.energia <- vab.energia %>% 
+               select(2) %>% 
+               mutate(vab_energia_eletrica = 1)
+                
+# Juntar tabela
+sintese.energia <- left_join(empregos.rais.energia,royalties.energia)
+sintese.energia <- left_join(sintese.energia,bndes.energia)
+sintese.energia <- left_join(sintese.energia,vab.energia, by = c('cod_muni'='cod')) %>% 
+                   select('cod_muni','muni','empregos_energia_rais','royalties_energia_cfh','energia_bndes','vab_energia_eletrica')
+
+sintese.energia[is.na(sintese.energia)] <- 0 # transformar N.A em zero
+sintese.energia <- sintese.energia %>% 
+                   mutate(total_energia = empregos_energia_rais + royalties_energia_cfh + energia_bndes + vab_energia_eletrica)
+
+
 
 # Coari gás financiamento (não teve), empregos (ver municípios) e royalties (incluir municípios com valor acima de 1 milhão)
-# Explicar que o critério do petróleo será diferente.
+# Explicar que o critério do petróleo será diferente. Ver VAB petróleo
 
 
 

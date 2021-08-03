@@ -4,12 +4,17 @@ source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
-# read_excel(path = 'Input/')
+# Carregar credenciais do data lake base dos dados
+load_dot_env()
+credencial <- Sys.getenv('CREDENCIAL_BASE_DOS_DADOS')
+basedosdados::set_billing_id(credencial)   
+
+# Importar dados populacionais
+pop.estimada.2019 <- read_excel(path = 'Input/tabela6579_pop_estimada_2019.xlsx')
 
 query <- "SELECT ano, sigla_uf, id_municipio, empresa, sinal, produto, SUM(acessos) as acessos FROM `basedosdados.br_anatel_telefonia_movel.municipio`
           WHERE ano = 2019
           GROUP BY ano, sigla_uf, id_municipio, empresa, sinal, produto"
-
 internet <- read_sql(query)
 
 unique(internet$produto) #Ver as categorias
@@ -23,13 +28,14 @@ internet.amzl.2019 <- internet %>%
                       summarise(acessos_2019 = sum(acessos, na.rm = TRUE))
 
 internet.amzl.2019$acessos_2019 <- as.numeric(internet.amzl.2019$acessos_2019)
+internet.amzl.2019$id_municipio <- as.numeric(internet.amzl.2019$id_municipio)
+internet.amzl.2019 <- left_join(internet.amzl.2019,pop.estimada.2019, by = c('id_municipio'='cod_muni')) %>% 
+                      select(1,3,2,4) %>% 
+                      mutate(acessos_cada_100_mil_hab = (acessos_2019/pop_resid_estimada_2019)*100000)
 
-internet.amzl.2019 <- classificar.variavel(internet.amzl.2019,'acessos_2019','class_acessos_2019')
-
-# Calcular a cada 100 mil habitantes pelas estimativas de 2019
-
+internet.amzl.2019 <- classificar.variavel(internet.amzl.2019,'acessos_cada_100_mil_hab','class_acessos_100mil_2019')
 
 x <- internet.amzl.2019 %>% 
-     group_by(class_acessos_2019) %>%
+     group_by(class_acessos_100mil_2019) %>%
      mutate(N_category = n()) %>%
      count(N_category)

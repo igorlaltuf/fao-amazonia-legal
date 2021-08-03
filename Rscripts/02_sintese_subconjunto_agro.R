@@ -11,6 +11,7 @@ emprego.rais <- read.csv(file = "Outputs/01_tabelas/01_empregos_rais.csv")
 estabelecimentos <- read.csv(file = "Outputs/01_tabelas/01_medios_e_grandes_estab_agropec.csv") 
 prod.agro <- read.csv(file = "Outputs/01_tabelas/01_producao_agro.csv") 
 itr.cota.parte <- read.csv(file = "Outputs/01_tabelas/01_itr_cota_parte.csv")
+datasus <- read.csv(file = "Outputs/01_tabelas/01_datasus_agro.csv")
 
 # Pontuação para categorias "alto" ou "muito alto"
 emprego.familiar <- emprego.familiar %>% 
@@ -34,18 +35,23 @@ itr.cota.parte <- itr.cota.parte %>%
                   mutate(cota_parte_itr = ifelse(itr.cota.parte$class_cota_parte_itr %in% c('Alto','Muito Alto'), 1,0))
 
 
+datasus <- datasus %>% 
+           select(2,8) %>% 
+           mutate(datasus = ifelse(datasus$class_cada_100_mil %in% c('Alto','Muito Alto'), 1,0))
+
 # Tabela síntese
 tabela.sintese.agro <- left_join(emprego.familiar,emprego.rais)
 tabela.sintese.agro <- left_join(tabela.sintese.agro,estabelecimentos)
 tabela.sintese.agro <- left_join(tabela.sintese.agro,prod.agro)
+tabela.sintese.agro <- left_join(tabela.sintese.agro,datasus, by=c('cod_muni'='id_municipio'))
 tabela.sintese.agro <- left_join(tabela.sintese.agro,itr.cota.parte) %>%     
-                       select('cod_muni','muni','emprego_familiar','emprego_rais','estabelecimentos','producao_agro','cota_parte_itr')
+                       select('cod_muni','muni','emprego_familiar','emprego_rais','estabelecimentos','producao_agro','cota_parte_itr','datasus')
                         
 
 tabela.sintese.agro[is.na(tabela.sintese.agro)] <- 0 # transformar N.A em zero
 
 tabela.sintese.agro <- tabela.sintese.agro %>% 
-                       mutate(total_agro = emprego_familiar + emprego_rais + estabelecimentos + producao_agro + cota_parte_itr)
+                       mutate(total_agro = emprego_familiar + emprego_rais + estabelecimentos + producao_agro + cota_parte_itr + datasus)
 
 # Exportar tabela
 write.csv(tabela.sintese.agro,file='Outputs/02_tabelas/02_subconjunto_agro.csv', na = '0')
