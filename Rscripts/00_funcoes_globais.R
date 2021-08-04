@@ -30,8 +30,3 @@ pontuacao.criterio1 <- function(dataframe, variavel.analisada = NULL, nova.varia
   novo.dataframe <- dataframe %>%
     mutate(nova.variavel = ifelse(dataframe$variavel.analisada %in% c('Alto','Muito Alto'), 1,0))
   }
-
-  
-
-  
-  
