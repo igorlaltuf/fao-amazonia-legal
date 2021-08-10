@@ -27,6 +27,14 @@ vab.min <- vab.min %>%
 bndes <- bndes %>% 
          select('cod_muni','mineracao_bndes')
 
+
+
+# Infra logística minero incluir (pronto)
+
+
+
+
+
 tabela.sintese.mineral <- left_join(empregos.mineral,royalties.cfem)
 tabela.sintese.mineral <- left_join(tabela.sintese.mineral,vab.min, by=c('cod_muni'='cod'))
 tabela.sintese.mineral <- left_join(tabela.sintese.mineral,bndes)

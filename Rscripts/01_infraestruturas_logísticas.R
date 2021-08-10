@@ -1,4 +1,4 @@
-# Dados sobre inraestruturas de suporte aos subconjuntos: armazens, portos, ferrovias, usinas de energia (térmicas e hidrelétricas)
+# Dados sobre inraestruturas logística de suporte aos subconjuntos: armazens, portos, ferrovias, usinas de energia (térmicas e hidrelétricas)
 # e projetos que serão implementados.
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
@@ -162,77 +162,133 @@ tabela.portos <- tabela.portos %>%
 
 # 25 portos dos 47 portos da AMZL são ligados a pelo menos 1 subconjunto.
 
-# Exportar (refazer e exportar um arquivo único)
-write.csv(tabela.portos, file='Outputs/01_tabelas/01_infraestrutura_produtiva.csv')
+# tabela final dos portos
+tabela.portos <- tabela.portos %>%  
+  as.data.frame() %>% 
+  select(1,2,7,8,9) %>% 
+  group_by(cod_muni) %>% 
+  summarise(porto_agro = ifelse(sum(porto_agropecuaria) > 0,1,0),
+            porto_petr_e_gás = ifelse(sum(porto_petroleo_e_gas) > 0,1,0),
+            porto_mineracao = ifelse(sum(porto_mineracao) > 0,1,0))
 
 
 # 2 - Verificar dados dos armazens existentes na AMZL em 2020
 armazens <- read_excel(path = './Input/armazens.xlsx') 
 armazens <- armazens %>% 
   mutate(existe_armazem = ifelse(armazens$armazens_e_silos_2_sem_2020 >0,1,0)) %>% 
-  mutate(existe_armazem2 = ifelse(armazens$armazens_e_silos_2_sem_2020 >0,'sim','não')) %>% 
+  select(1,4) %>% 
   dplyr::filter(cod_muni %in% cidades.amazonia.legal)
 
 
 # 3 - Ferrovias na AMZL
+# foram considerados apenas os municípios que carregam os trens com produtos da mineração ou do agronegócio na AMZL
+
+# Usar o shape ferrovias  para plotar as ferrovias na cor daquilo que é transportado
+ferrovias <- st_read('./Input/shapes logística/ferrovias/Ferrovias.shp') %>% 
+  dplyr::filter(UF %in% uf.amz.legal) %>% 
+  mutate(ferrovia_mineral = ifelse(PRODUTOS_5 %in% 'Derivados de petróleo, álcool, cimento e ferro-gusa',1,0)) %>% 
+  mutate(ferrovia_petroleo = ifelse(PRODUTOS_5 %in% 'Derivados de petróleo, álcool, cimento e ferro-gusa',1,0)) %>% 
+  mutate(ferrovia_agropec = ifelse(PRODUTOS_5 %in% 'Minério de ferro, minério de manganês, ferro-gusa, veículos, combustível e soja',1,0)) %>% 
+  mutate(ferrovia_mineral = ifelse(PRODUTOS_5 %in% 'Minério de ferro, minério de manganês, ferro-gusa, veículos, combustível e soja',1,ferrovia_mineral)) 
+
+# Declaração de rede das ferrovias de 2020 - usar para pontuar as cidades em que as mercadorias são carregadas
+# https://antt-hml.antt.gov.br/declaracao-de-rede-2020
+
+# RMN - Rumo Malha Norte (antiga ALLMN)
+rmn.prod <- read_excel('Input/ANTT declaração de rede/DR_2020_RMN.xlsx', sheet = 4, skip = 1)
+####### RENOMEAR O TERMINAL Terminal Olacyr F. Morais??? QUAL CIDADE????###################
+rmn.prod <- rmn.prod %>% 
+            filter(str_detect(Origem, paste0(muni.nome.amzl,collapse = '|')))
 
 
+# EFC - Estrada de Ferro dos Carajás (VALE)
+efc.prod <- read_excel('Input/ANTT declaração de rede/DR_2020_EFC.xlsx', sheet = 4, skip = 1) 
+# Colocar nomes dos municípios no lugar do nome dos terminais (Serra Leste é em Curionópolis, Serra Sul em Canaã dos Carajás e Carajás é em Paraupebas).
+efc.prod$Origem<-replace(efc.prod$Origem, efc.prod$Origem=='Serra Leste (QSL, EFC)','Curionópolis')
+efc.prod$Origem<-replace(efc.prod$Origem, efc.prod$Origem=='Serra Sul (QSS, EFC)','Canaã dos Carajás')
+efc.prod$Origem<-replace(efc.prod$Origem, efc.prod$Origem=='Carajás (QCA, EFC)','Parauapebas')
+efc.prod <- efc.prod %>% 
+            filter(str_detect(Origem, paste0(muni.nome.amzl,collapse = '|')))
 
 
+# FNS-TN (Ferr. Norte Sul Tramo Norte)
+# aqui apenas um terminal da Suzano que o nome não é igual ao nome do município
+fnstn.prod <- read_excel('Input/ANTT declaração de rede/DR_2020_FNSTN.xlsx', sheet = 4, skip = 1) %>%   
+              filter(str_detect(Origem, paste0(muni.nome.amzl,collapse = '|')))
+
+# Projetos ferroviários como ferrogrão, ferrovia do Pará, Ferrovia de integração do centro oeste não foram considerados na pontuação.
+
+# Planilha das ferrovias
+ferrovias.muni <- rbind(rmn.prod,efc.prod)
+ferrovias.muni <- rbind(ferrovias.muni,fnstn.prod) %>% select(4,12) %>% unique()
+colnames(ferrovias.muni) <- c('origem','produtos')
+
+mineral <- str_extract(ferrovias.muni$produtos, regex("minério|mineral|ferro", ignore_case = TRUE))
+agro <- str_extract(ferrovias.muni$produtos, regex("soja", ignore_case = TRUE))
+
+ferrovias.muni <- ferrovias.muni %>% 
+  mutate(ferrov_mineral = ifelse(str_detect(ferrovias.muni$produtos,mineral)==T,1,0)) %>% 
+  mutate(ferrov_agropec = ifelse(str_detect(ferrovias.muni$produtos,agro)==T,1,0)) 
 
 
+muni.nome.amzl <- cidades.amazonia.legal.nome
+muni.nome.amzl$muni <- stri_sub(muni.nome.amzl$muni,1,-6)
+tabela.ferrovias <- left_join(muni.nome.amzl,ferrovias.muni, by=c('muni'='origem'))
+ferrovias.muni$origem <- substr(ferrovias.muni$origem,1,nchar(ferrovias.muni$origem)-11)
+tabela.ferrovias <- left_join(tabela.ferrovias,ferrovias.muni, by=c('muni'='origem'))
+ferrovias.muni$origem <- substr(ferrovias.muni$origem,1,nchar(ferrovias.muni$origem)-2)
+tabela.ferrovias <- left_join(tabela.ferrovias,ferrovias.muni, by=c('muni'='origem'))
+
+tabela.ferrovias <- tabela.ferrovias %>% 
+                    select(1,2,4,5,7,8,10,11)
+
+tabela.ferrovias[is.na(tabela.ferrovias)] <- 0
+
+tabela.ferrovias <- tabela.ferrovias %>% 
+                    mutate(total_mineral = ferrov_mineral.x + ferrov_mineral.y + ferrov_mineral) %>% 
+                    mutate(total_agro = ferrov_agropec.x + ferrov_agropec.y + ferrov_agropec) %>% 
+                    select(1,9,10) %>% 
+                    group_by(cod_muni) %>% 
+                    summarise(ferrov_mineral = sum(total_mineral),
+                              ferrov_agro = sum(total_agro)) %>% 
+                    dplyr::filter(ferrov_mineral > 0 | ferrov_agro > 0) %>% 
+                    mutate(ferrov_mineral = ifelse(ferrov_mineral > 0, 1, 0)) %>% 
+                    mutate(ferrov_agro = ifelse(ferrov_agro > 0, 1, 0))
 
 
+# 4 - Dutovias na AMZL (não inclui na tabela final)
+muni.nome.amzl <- cidades.amazonia.legal.nome[2]
+muni.nome.amzl <- stri_sub(muni.nome.amzl$muni,1,-6)
+muni.nome.amzl <- paste0(muni.nome.amzl,collapse = "|")
+
+dutovias <- st_read('./Input/shapes logística/dutovias/Dutovias.shp') %>% 
+            as.data.frame() %>% 
+            select(2,15,22,23) %>% 
+            dplyr::filter(grepl(muni.nome.amzl,MUNIC_ORIG,ignore.case = T))
+          
+# 5 - Rodovias 
+# Ainda não foi decidido se será utilizado. Ver artigo do Banco Mundial.
 
 
+# 6 - tabela síntese
+infra.logistica <- left_join(cidades.amazonia.legal.nome,tabela.portos, by = c('cod_muni'='cod_muni'))
+infra.logistica <- left_join(infra.logistica,armazens, by = c('cod_muni'='cod_muni'))
+infra.logistica <- left_join(infra.logistica,tabela.ferrovias, by = c('cod_muni'='cod_muni'))
+
+infra.logistica[is.na(infra.logistica)] <- 0
+
+# aqui as duas últimas coluna sintetizam os valores de agro e mineração, caso um município tenha apresentado pelo menos um tipo de infraestrutura
+infra.logistica <- infra.logistica %>% 
+                   mutate(infra_agro = ifelse(porto_agro+existe_armazem+ferrov_agro>0,1,0)) %>% 
+                   mutate(infra_mineral = ifelse(porto_mineracao+ferrov_mineral>0,1,0))  
+
+# É o recorte das duas últimas colunas acima.
+infra.logistica.acumulada <- infra.logistica %>% select(1,2,9,10)
 
 
-
-# 4 - Dutovias na AMZL
-
-
-
-
-
-
-
-# 5 - Infraestrutura energética
-
-
-
-# Dados de geração de energia na Amazônia Legal (AGUARDANDO DADOS DA AMANDA DAS SUB-BACIAS E TERMOELÉTRICAS)
-infra.energetica <- read_excel(path = 'Input/Banco_de_dados_nao_padronizados_energia.xls',col_types = c("text","numeric","numeric","date","text","numeric","numeric")) %>% 
-                    dplyr::filter(cod_muni %in% cidades.amazonia.legal)
-
-infra.energetica <- left_join(infra.energetica,cidades.amazonia.legal.nome) 
-colnames(infra.energetica)[8] <- 'muni_principal'
-
-infra.energetica <- left_join(infra.energetica,cidades.amazonia.legal.nome, by=c('cod_muni_2'='cod_muni')) %>% 
-  select(1,2,8,6,9,3,4,5,7)
-colnames(infra.energetica)[5] <- 'muni_secundario'
-
-infra.energetica <- infra.energetica %>% 
-                    dplyr::filter(tipo_de_energia %in% 'Hidrelétrica - UHE') 
-                    
-
-# ver se nos financiamentos do BNDES também filtro apenas essas UHE de energia hidreletrica
-# Ver região de influencia dos empreendimentos EIA RIMA e tabelular
-
-# Belo monte começou a operar depois de 2015, por isso não consta aqui. Ver nos financiamentos do BNDES as que surgiram depois!
-# e incluir aqui!!!
-
-
-# EXPORTAR em csv e enviar no excel!
-write.csv(infra.energetica,file = 'Outputs/01_tabelas/01_infra_energia_eletrica_amz_legal.csv')
-
-
-
-# Falta incluir dados de:
-
-# portos, pontos multimodais, ferrovias, usinas de energia e projetos que serão implementados.
-# Incluir dados sobre terminais ferroviários que escoam Soja, Milho e Arroz, minério de ferro etc
-
-# Exportar o arquivo
-#write.csv(prod.agro,file='Outputs/01_tabelas/01_producao_agro.csv',sep = ';',na = '0')
+# Exportar 
+write.csv(infra.logistica.acumulada, file='Outputs/01_tabelas/01_infra_logistica.csv')
 
 # Verificar as cidades intermediadoras
+intermed <- infra.logistica.acumulada %>% 
+            dplyr::filter(cod_muni %in% cidades.intermediadoras)

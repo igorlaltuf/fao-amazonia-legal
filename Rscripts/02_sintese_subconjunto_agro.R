@@ -16,9 +16,15 @@ gado <- read.csv(file = 'Outputs/01_tabelas/01_prod_gado.csv')
 desmatamento <- read.csv(file = 'Outputs/01_tabelas/01_desmatamento.csv')
 
 # Pontuação para categorias "alto" ou "muito alto"
-emprego.familiar <- emprego.familiar %>% 
-                    select(2,3,6,7) %>% 
-                    mutate(emprego_familiar = ifelse(emprego.familiar$class_familiar_sobre_agro %in% c('Baixo','Muito Baixo'), 1,0))
+
+# 
+# emprego.familiar <- emprego.familiar %>% 
+#                     select(2,3,6,7) %>% 
+#                     mutate(emprego_familiar = ifelse(emprego.familiar$class_familiar_sobre_agro %in% c('Baixo','Muito Baixo'), 1,0))
+
+# Infra logística agro incluir (pronto)
+
+
 
 emprego.rais <- emprego.rais %>% 
                 select(2,3,10,11) %>% 
