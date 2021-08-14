@@ -196,7 +196,6 @@ ferrovias <- st_read('./Input/shapes logística/ferrovias/Ferrovias.shp') %>%
 
 # RMN - Rumo Malha Norte (antiga ALLMN)
 rmn.prod <- read_excel('Input/ANTT declaração de rede/DR_2020_RMN.xlsx', sheet = 4, skip = 1)
-####### RENOMEAR O TERMINAL Terminal Olacyr F. Morais??? QUAL CIDADE????###################
 rmn.prod <- rmn.prod %>% 
             filter(str_detect(Origem, paste0(muni.nome.amzl,collapse = '|')))
 
@@ -254,6 +253,13 @@ tabela.ferrovias <- tabela.ferrovias %>%
                     dplyr::filter(ferrov_mineral > 0 | ferrov_agro > 0) %>% 
                     mutate(ferrov_mineral = ifelse(ferrov_mineral > 0, 1, 0)) %>% 
                     mutate(ferrov_agro = ifelse(ferrov_agro > 0, 1, 0))
+
+
+###### outra fonte de dados sobre ferrovias https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade
+ferrovias.mercadorias <- read_excel('Input/ANTT declaração de rede/Producao_Origem__Destino_2006__ junho 2021.xlsx', sheet = 14,skip = 1)
+colnames(ferrovias.mercadorias) <- c('mes/ano','ferrovia','mercadoria_antt','estacao_origem','uf','estacao_destino','uf','tu','tku')
+
+
 
 
 # 4 - Dutovias na AMZL (não inclui na tabela final)
