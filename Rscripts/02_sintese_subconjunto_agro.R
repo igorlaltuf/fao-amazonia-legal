@@ -13,8 +13,8 @@ prod.agro <- read.csv(file = "Outputs/01_tabelas/01_producao_agro.csv")
 itr.cota.parte <- read.csv(file = "Outputs/01_tabelas/01_itr_cota_parte.csv")
 datasus <- read.csv(file = "Outputs/01_tabelas/01_datasus_agro.csv")
 gado <- read.csv(file = 'Outputs/01_tabelas/01_prod_gado.csv')
-desmatamento <- read.csv(file = 'Outputs/01_tabelas/01_desmatamento.csv')
-
+desmatamento <- read.csv(file = 'Outputs/01_tabelas/01_desmatamento_agro.csv')
+infraestrutura <- read.csv(file = 'Outputs/01_tabelas/01_infra_logistica.csv')
 # Pontuação para categorias "alto" ou "muito alto"
 
 # 
@@ -22,53 +22,66 @@ desmatamento <- read.csv(file = 'Outputs/01_tabelas/01_desmatamento.csv')
 #                     select(2,3,6,7) %>% 
 #                     mutate(emprego_familiar = ifelse(emprego.familiar$class_familiar_sobre_agro %in% c('Baixo','Muito Baixo'), 1,0))
 
-# Infra logística agro incluir (pronto)
-
-
-
+# Empregos formais
 emprego.rais <- emprego.rais %>% 
                 select(2,3,10,11) %>% 
                 mutate(emprego_rais = ifelse(emprego.rais$class_empregos_agro %in% c('Alto','Muito Alto'), 1,0))
 
+# Quantidade de médios e grandes estabelecimentos agropecuários
 estabelecimentos <- estabelecimentos %>% 
                     select(2,3,8,9)%>% 
                     mutate(estabelecimentos = ifelse(estabelecimentos$class_medios_e_grandes_estab %in% c('Alto','Muito Alto'), 1,0))
+
+# soja ou gado
+gado <- gado %>% 
+  select(2,4,5) %>% 
+  mutate(prod_gado = ifelse(gado$class_gado_2019 %in% c('Alto','Muito Alto'), 1,0))
 
 prod.agro <- prod.agro %>% 
              select(2,3,7,8)%>% 
              mutate(producao_agro = ifelse(prod.agro$class_valor_producao %in% c('Alto','Muito Alto'), 1,0))
 
+graos_gado <- left_join(gado,prod.agro,by='cod_muni') %>% 
+              select(1,5,4,8) %>% 
+              mutate(graos_gado = ifelse(prod_gado|producao_agro == 1, 1, 0))
+
+
+# ITR cota parte
 itr.cota.parte <- itr.cota.parte %>% 
                   select(2,5) %>% 
                   mutate(cota_parte_itr = ifelse(itr.cota.parte$class_cota_parte_itr %in% c('Alto','Muito Alto'), 1,0))
 
+# incidência de câncer (atualizar para demais anos)
 datasus <- datasus %>% 
            select(2,7,8) %>% 
            mutate(datasus = ifelse(datasus$class_cada_100_mil %in% c('Alto','Muito Alto'), 1,0))
 
-gado <- gado %>% 
-        select(2,4,5) %>% 
-        mutate(prod_gado = ifelse(gado$class_gado_2019 %in% c('Alto','Muito Alto'), 1,0))
-
+# Desmatamento INPE
 desmatamento <- desmatamento %>% 
-                select(2,10,11) %>% 
-                mutate(desmatamento = ifelse(desmatamento$class_desmatamento %in% c('Alto','Muito Alto'), 1,0))
-                
-# Tabela síntese
-tabela.sintese.agro <- left_join(emprego.familiar,emprego.rais)
-tabela.sintese.agro <- left_join(tabela.sintese.agro,estabelecimentos)
-tabela.sintese.agro <- left_join(tabela.sintese.agro,prod.agro)
-tabela.sintese.agro <- left_join(tabela.sintese.agro, datasus)
-tabela.sintese.agro <- left_join(tabela.sintese.agro,gado)
-tabela.sintese.agro <- left_join(tabela.sintese.agro,desmatamento)
-tabela.sintese.agro <- left_join(tabela.sintese.agro,itr.cota.parte) %>%     
-                       select('cod_muni','muni','emprego_familiar','emprego_rais','estabelecimentos','producao_agro','cota_parte_itr','datasus','prod_gado','desmatamento')
-                        
+                select('cod_muni','class_desmat') %>% 
+                mutate(desmatamento = ifelse(desmatamento$class_desmat %in% c('Alto','Muito Alto'), 1,0))
+               
+# Infra logística agro incluir (pronto) - portos, ferrovias e armazéns
+infraestrutura <- infraestrutura %>% 
+                  select(2:4)
+                  
 
+
+# Tabela síntese
+tabela.sintese.agro <- left_join(emprego.rais,estabelecimentos, by=c('cod_muni','muni'))
+tabela.sintese.agro <- left_join(tabela.sintese.agro,graos_gado, by=c('cod_muni','muni'))
+tabela.sintese.agro <- left_join(tabela.sintese.agro, datasus, by=c('cod_muni'))
+tabela.sintese.agro <- left_join(tabela.sintese.agro,itr.cota.parte, by=c('cod_muni'))
+tabela.sintese.agro <- left_join(tabela.sintese.agro,desmatamento, by=c('cod_muni'))
+tabela.sintese.agro <- left_join(tabela.sintese.agro,infraestrutura, by=c('cod_muni','muni'))
+
+tabela.sintese.agro <- tabela.sintese.agro %>%     
+                       select('cod_muni','muni','emprego_rais','estabelecimentos','graos_gado','cota_parte_itr','datasus','desmatamento','infra_agro')
+                        
 tabela.sintese.agro[is.na(tabela.sintese.agro)] <- 0 # transformar N.A em zero
 
 tabela.sintese.agro <- tabela.sintese.agro %>% 
-                       mutate(total_agro = emprego_familiar + emprego_rais + estabelecimentos + producao_agro + cota_parte_itr + datasus + prod_gado + desmatamento)
+                       mutate(total_agro = emprego_rais + estabelecimentos + graos_gado + cota_parte_itr + datasus + desmatamento + infra_agro)
 
 # Exportar tabela
 write.csv(tabela.sintese.agro,file='Outputs/02_tabelas/02_subconjunto_agro.csv', na = '0')

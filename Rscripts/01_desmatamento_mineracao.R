@@ -76,33 +76,29 @@ desmatamento.mineracao[2] <- substr(cidades.amazonia.legal.nome$muni,1,nchar(cid
 df_teste_sem_acento <- rm_accent(desmatamento.mineracao$muni)
 desmatamento.mineracao[2] <- df_teste_sem_acento
 
-# continuar daqui!!! Fazer o join abaixo
- 
 
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Tucume','Tucuma')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Poxoreo','Poxoreu')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Machadinho DOeste','Machadinho D\'Oeste')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Espigao D Oeste','Espigao D\'Oeste')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Mirassol d Oeste','Mirassol d\'Oeste')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Eldorado dos Carajas','Eldorado do Carajas')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Santa Isabel do Para','Santa Izabel do Para')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Pau DArco','Pau D\'Arco')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'Igarape Miri','Igarape-Miri')
+desm.minerac.total$Municípios<-replace(desm.minerac.total$Municípios, desm.minerac.total$Municípios == 'JiParana','Ji-Parana')
 
+desmatamento.mineracao <- left_join(desm.minerac.total, desmatamento.mineracao, by = c('Municípios' = 'muni'))
 
-desmatamento.mineracao <- left_join(desm.minerac.total,desmatamento.mineracao,by = c('Municípios'='muni'))
+desmatamento.mineracao$cod_muni<-replace(desmatamento.mineracao$cod_muni, desmatamento.mineracao$cod_muni == '1505551',NA) # excluir cidade com o mesmo nome em dois estados diferentes
 
+desmatamento.mineracao <- na.omit(desmatamento.mineracao) # verificar NA
 
+desmatamento.mineracao <- desmatamento.mineracao %>% select(3,1,2)
 
+desmatamento.mineracao <- classificar.variavel(desmatamento.mineracao,'total','class_desmatamento_minerac')
 
+desmatamento.mineracao <- left_join(desmatamento.mineracao,cidades.amazonia.legal.nome,by='cod_muni') %>%  # colocar nomes corretos dos municípios
+  select(1,5,3,4)              
 
-# desmatamento.mineracao os códigos estão com NA nos municípios que não estão com o mesmo nome! resolver isso!
-# remover pontuação
-
-
-# CONTINUAR DAQUI!
-# verificar nomes duplicados (Rio Branco)
-# Verificar nomes com escrita diferente (D'Oeste, caixa alta etc)
-duplicated(desmatamento.mineracao$muni)
-
-
-
-
-
-# Fazer bater com os valores das cidades da amz legal para pegar os códigos
-# Remover a linha com o total (será feito automaticamente)
-# classificar
-
-
-
+write.csv(desmatamento.mineracao,'Outputs/01_tabelas/01_desmatamento_mineracao.csv')

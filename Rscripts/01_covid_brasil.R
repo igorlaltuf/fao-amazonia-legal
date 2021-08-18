@@ -39,7 +39,7 @@ tabela.covid <- gt(intermed) %>%
     columns = c('city_ibge_code','date','estimated_population','place_type','state')
   ) %>% 
   tab_header(
-    title = 'Mortalidade do COVID-19 na Amazônia Legal',
+    title = 'Mortalidade por Covid-19 nas cidades intermediárias da Amazônia Legal',
     subtitle = 'Entre 17/03/2020 e 12/08/2021'
   ) %>%
   fmt_markdown(
@@ -62,30 +62,86 @@ gtsave(tabela.covid, 'Outputs/Covid_intermediadoras.png')
 
 write.csv(covid,'Outputs/covid_classificacao.csv')
 
-# mapa AMZL
+mean(covid$obitos_100_mil_ha)
+
+# mapa Brasil por município
 shape.muni <- geobr::read_municipality() 
 shape.muni <- left_join(covid,shape.muni, by = c('city_ibge_code'='code_muni'))
 
+# transforma character em factors
+shape.muni$class_obit_100_mil_ha <- as.factor(shape.muni$class_obit_100_mil_ha)
+
+# define a ordem dos factors (em 6 levels)
+shape.muni$class_obit_100_mil_ha <- factor(shape.muni$class_obit_100_mil_ha, levels = c('Muito Alto','Alto','Médio Alto','Médio Baixo','Baixo','Muito Baixo'))
+
+# coord dos pontos
+coord.cidades <- read_municipal_seat(year = 2010,showProgress = T) %>% 
+  dplyr::filter(code_muni %in% cidades.intermediadoras)
+
+# recorte da amzl com classificação do Brasil # REMOVER PARA VER O MAPA DO BRASIL INTEIRO
+shape.muni <- shape.muni %>% 
+              dplyr::filter(city_ibge_code %in% cidades.amazonia.legal)
 
 
-
-
-library(RColorBrewer)
-library(ggspatial)
-
+# óbitos a cada 100 mil hab
 ggplot(shape.muni)+
   geom_sf(aes(fill=class_obit_100_mil_ha, geometry = geom), colour = NA)+
   scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
-  #scale_fill_gradientn(colors = brewer.pal(6,'Greens'))+ #rev reverte a ordem
+  geom_point(data = coord.cidades, aes(geometry = geom), stat = "sf_coordinates")+
+  geom_sf_text(data = coord.cidades, aes(label = name_muni), colour='grey10',vjust=1.3, size = 1.8) +
   labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location='tl', 
                          style = north_arrow_fancy_orienteering())+
-  theme_minimal() +
-  theme(legend.position = 'bottom') # daqui p baixo tira o grid do mapa
+  theme_classic()+ # retira o grid e coloca o fundo branco
+  theme(legend.position = 'bottom')
+
 
 ggsave('Outputs/covid_nacional.png', width = 9, height = 6)
+
+
+# estabelecimentos de saúde
+cnes <- read_health_facilities()
+cnes <- cnes %>% 
+  dplyr::filter(abbrev_state %in% uf.amz.legal)
+
+
+ggplot(shape.muni)+
+  geom_sf(aes(fill=class_obit_100_mil_ha, geometry = geom), colour = NA)+
+  scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
+  geom_point(data = cnes, aes(geometry = geom), stat = "sf_coordinates", size = .05)+
+  labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
+  coord_sf(crs = 4674) +
+  annotation_scale(location = 'br')+
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering())+
+  theme_classic()+ # retira o grid e coloca o fundo branco
+  theme(legend.position = 'bottom')
+
+
+
+
+
+
+
+
+
+
+
+# óbitos (desenvolver mais)
+ggplot(shape.muni)+
+  geom_sf(aes(fill=last_available_deaths/1000, geometry = geom), colour = NA)+
+  scale_fill_gradientn(colours = brewer.pal(10,"YlOrRd"))+
+  # scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
+  labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
+  coord_sf(crs = 4674) +
+  annotation_scale(location = 'br')+
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering())+
+  theme_classic()+ # retira o grid e coloca o fundo branco
+  theme(legend.position = 'bottom')
+
 
 
 
