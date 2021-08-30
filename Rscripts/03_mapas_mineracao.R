@@ -5,7 +5,10 @@ source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
+# importar dados
 mineracao <- read.csv(file = "Outputs/02_tabelas/02_subconjunto_mineral.csv")
+
+# importar shape
 hidrovias <- read_sf('Input/shapes logística/hidrovias/Hidrovias.shp') %>% 
              dplyr::filter(cla_icacao %in% c('Navegável', 'Navegação sazonal'))
 ferrovias <- read_sf('Input/shapes logística/ferrovias/Ferrovias.shp') %>% 
@@ -13,31 +16,31 @@ ferrovias <- read_sf('Input/shapes logística/ferrovias/Ferrovias.shp') %>%
                            TIP_SITUAC %in% 'Em Operação')
 
 # mapa AMZL por município
-shape.muni <- geobr::read_municipality() %>% 
-  dplyr::filter(code_muni %in% cidades.amazonia.legal)
+shape.muni <- st_read('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
 
-mineracao <- left_join(mineracao,shape.muni, by = c('cod_muni'='code_muni')) %>% 
+
+mineracao <- left_join(mineracao,shape.muni, by = c('cod_muni'='cd_mn')) %>%   
   select('cod_muni','muni','emprego_mineracao','royalties_cfem','mineracao_bndes','infra_mineral',
-         'desmatamento_minerac','minerac_ilegal','total_mineral','geom')
+         'desmatamento_minerac','minerac_ilegal','total_mineral','geometry')
 
 # coordenadas das cidades intermediadoras
-coord.cidades <- read_municipal_seat(year = 2010,showProgress = T) %>% 
-  dplyr::filter(code_muni %in% cidades.intermediadoras)
+coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
    
-ferrovias <- st_intersection(ferrovias,shape.muni)
-hidrovias <- st_intersection(hidrovias,shape.muni)
+ferrovias <- st_intersection(ferrovias, shape.muni)
+hidrovias <- st_intersection(hidrovias, shape.muni)
 
 # Não está aparecendo o pedaço da ferrovia que passa por Rondonópolis
 
 # 1 - Mapa do somatório dos indicadores
 ggplot(mineracao)+
-  geom_sf(aes(fill = total_mineral, geometry = geom), colour = NA) +
+  geom_sf(aes(fill = total_mineral, geometry = geometry), colour = NA) +
   scale_fill_gradientn(colors = brewer.pal(6,"OrRd")) +
-  geom_sf(data = ferrovias, colour='blue') +
-  geom_sf(data = hidrovias, colour='red') +
-  geom_point(data = coord.cidades, aes(geometry = geom), stat = "sf_coordinates", size = 1) +
-  geom_sf_text(data = coord.cidades, aes(label = name_muni), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Indicadores acumulados de mineração na AMZL', x = 'Lng', y = 'Lat') + #Muda o nome da legenda com o fill.
+  geom_sf(data = ferrovias, aes(col = 'Ferrovias'), size = 0.5, show.legend = 'line') +
+  geom_sf(data = hidrovias, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
+  scale_colour_discrete("") + # muda o título da legenda
+  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
+  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
+  labs(fill= 'Classificação de mineração na \n Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -45,15 +48,14 @@ ggplot(mineracao)+
   theme_classic() + # retira o grid e coloca o fundo branco
   theme(legend.position = 'bottom')
 
-
 # salvar mapa
-
+ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png', scale = 2)
 
 # 2 - Mapas dos indicadores separados
 x <- c('emprego_mineracao','royalties_cfem','mineracao_bndes',
        'infra_mineral','desmatamento_minerac','minerac_ilegal')
-y <- c('Empregos formais na mineração','Royalties CFEM','Grandes desembolsos BNDES',
-       'Infraestrutura de apoio', 'Desmatamento','Mineração Ilegal')
+y <- c('Empregos formais na \n mineração','Royalties CFEM','Grandes desembolsos \n BNDES',
+       'Infraestrutura de apoio', 'Desmatamento','Mineração ilegal')
 
 # transformar de numeric para factor
 mineracao$emprego_mineracao <- as.factor(mineracao$emprego_mineracao)
@@ -64,17 +66,15 @@ mineracao$desmatamento_minerac <- as.factor(mineracao$desmatamento_minerac)
 mineracao$minerac_ilegal <- as.factor(mineracao$minerac_ilegal)
 
 i <- 1
-
 while(i<=length(x)){
   mapa <- ggplot(mineracao)+
-    geom_sf(aes(fill=!!as.name(x[i]), geometry = geom), colour = NA) +
+    geom_sf(aes(fill=!!as.name(x[i]), geometry = geometry), colour = NA) +
     scale_fill_manual(breaks = c('0','1'),
                       values=c('#fee8c8','#e34a33'),
-                      label = c('demais valores','Alto/Muito alto')) +
-    geom_sf(data = ferrovias, colour='blue') +
-    geom_sf(data = hidrovias, colour='red') +
-    geom_point(data = coord.cidades, aes(geometry = geom), stat = "sf_coordinates", size = .5) +
-    labs(fill = y[i], x = 'Lng', y = 'Lat') + #Muda o nome da legenda com o fill.
+                      label = c('demais faixas','Alto/Muito alto')) +
+    geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .5) +
+    geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2) +
+    labs(fill = y[i], x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
     coord_sf(crs = 4674) +
     annotation_scale(location = 'br')+
     annotation_north_arrow(location = 'tl', 
@@ -82,15 +82,17 @@ while(i<=length(x)){
     theme_classic() + # retira o grid e coloca o fundo branco
     theme(legend.position = 'bottom')
   
-  assign(paste("mapa", i, sep="."),mapa)
+  assign(paste("mapa", i, sep="."), mapa)
   
   i <- i + 1
 }
 
-# Fazer os mapas
-mapa.1 + mapa.2 
-mapa.3 + mapa.4
-mapa.5 
-mapa.6
+mapa.4 <- mapa.4 + scale_fill_manual(breaks = c('0','1'),
+                           values=c('#fee8c8','#e34a33'),
+                           label = c('não existe','existe'))
 
-# salvar mapas
+# Fazer os mapas
+(mapa.1 | mapa.2)/
+(mapa.3 | mapa.5)/
+(mapa.4 | mapa.6)
+ggsave('Outputs/03_mapas/Mineração/indicadores_juntos_mineral.png', scale = 3)

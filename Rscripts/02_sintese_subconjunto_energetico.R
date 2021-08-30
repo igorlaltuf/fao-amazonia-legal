@@ -15,21 +15,20 @@ desmatamento <- read.csv('Outputs/01_tabelas/01_desmatamento_bacias_energia.csv'
 
 # Empregos Energia
 empregos.rais.energia <- empregos.energia %>% 
-                         select(2:5) %>% 
-                         mutate(empregos_energia_rais = ifelse(empregos.energia$class_empregos_energia %in% c('Alto','Muito Alto'),1,0))
+                         select('cod_muni','muni','qtd_empregos_energia','class_empregos_agro') %>% 
+                         mutate(pont_empregos_energia = ifelse(empregos.energia$class_empregos_energia %in% c('Alto','Muito Alto'),1,0))
 
 # Royalties
 royalties.energia <- royalties.energia %>% 
-                     select(2:5) %>% 
-                     mutate(royalties_energia_cfh = ifelse(royalties.energia$class_royalties_cfh %in% c('Alto','Muito Alto'),1,0))
+                     select('cod_muni','muni','royalties_cfh_energia_eletrica','class_royalties_cfh') %>% 
+                     mutate(pont_royalties_energia_cfh = ifelse(royalties.energia$class_royalties_cfh %in% c('Alto','Muito Alto'),1,0))
 
 # BNDES
 bndes.energia <- bndes %>% 
                  select('cod_muni','energia_bndes')
 
 # Infra energia elétrica - Térmicas e hidrelétrica
-infra.energia
-
+# pronto
 
 # Desmatamento bacias hidrográficas
 desmatamento <- desmatamento %>% 
@@ -37,37 +36,21 @@ desmatamento <- desmatamento %>%
   mutate(desmatamento_bacias = ifelse(desmatamento$class_hidro %in% c('Alto','Muito Alto'), 1,0))
 
 
-
 # Juntar tabela
-sintese.energia <- left_join(empregos.rais.energia,royalties.energia, by=c('cod_muni','muni'))
-sintese.energia <- left_join(sintese.energia,bndes.energia, by='cod_muni')
-sintese.energia <- left_join(sintese.energia,infra.energia, by=c('cod_muni','muni'))
-sintese.energia <- left_join(sintese.energia,desmatamento, by='cod_muni')
+sintese.energia <- left_join(empregos.rais.energia, royalties.energia, by = c('cod_muni','muni'))
+sintese.energia <- left_join(sintese.energia, bndes.energia, by = 'cod_muni')
+sintese.energia <- left_join(sintese.energia, infra.energia, by = c('cod_muni','muni'))
+sintese.energia <- left_join(sintese.energia, desmatamento, by = 'cod_muni')
 
 sintese.energia <- sintese.energia %>% 
-                   select('cod_muni','muni','empregos_energia_rais','royalties_energia_cfh','energia_bndes','existe_UTE','existe_UHE_PCH','desmatamento_bacias')
+                   select('cod_muni','muni','pont_empregos_energia','pont_royalties_energia_cfh','energia_bndes','existe_UTE','existe_UHE_PCH','desmatamento_bacias')
 
-# 
-# # VAB Energia elétrica
-# vab.energia <- vab.energia %>% 
-#                select(2) %>% 
-#                mutate(vab_energia_eletrica = 1)
-          
+colnames(sintese.energia)[5] <- 'pont_financ_bndes'
+colnames(sintese.energia)[8] <- 'pont_desm_bacia'
+
 sintese.energia[is.na(sintese.energia)] <- 0 # transformar N.A em zero
 sintese.energia <- sintese.energia %>% 
-                   mutate(total_energia = empregos_energia_rais + royalties_energia_cfh + energia_bndes + existe_UTE + existe_UHE_PCH + desmatamento_bacias)
-
-
+                   mutate(total_energia = pont_empregos_energia + pont_royalties_energia_cfh + pont_financ_bndes + existe_UTE + existe_UHE_PCH + pont_desm_bacia)
 
 # Exportar tabela
-write.csv(sintese.energia,file='Outputs/02_tabelas/02_subconjunto_energia.csv', na = '0')
-
-
-
-# Coari gás financiamento (não teve), empregos (ver municípios) e royalties (incluir municípios com valor acima de 1 milhão)
-# Explicar que o critério do petróleo será diferente. Ver VAB petróleo
-
-
-# Incluir as infraestruturas de energia elétrica (já tenho os dados. Ver financiamentos do BNDES para ver usinas pós 2015 e contrapor os dados (belo monte não consta)
-# emprego em construção civil na época da obra
-# Ver área de influencia dos empreendimentos UHE
+write.csv(sintese.energia, file='Outputs/02_tabelas/02_subconjunto_energia.csv', row.names = F)

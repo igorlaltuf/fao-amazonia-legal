@@ -12,13 +12,13 @@ which(is.na(fin.bndes.original$valor_contratado_corrente)) # retorna a linha dos
 
 fin.bndes.deflac <- fin.bndes.original %>% 
                     mutate(fin.bndes.original,desembolso_deflac = deflate(valor_desembolsado_corrente,as.Date(ymd(fin.bndes.original$data_contrato)),'04/2021','igpdi')) %>% 
-                    dplyr::filter(desembolso_deflac>=40000000 & 
+                    dplyr::filter(desembolso_deflac >= 40000000 & 
                     porte_cliente == 'GRANDE' &
                     natureza_cliente == 'PRIVADA') #filtra os grandes investimentos (acima de R$ 40 milhões de 2021)
 
 bndes.energia <- fin.bndes.deflac %>% 
-                 filter(str_detect(nome_sub_setor_cnae, "^GERACAO DE ENERGIA ELETRICA - HIDRELETRICA")) 
-
+                 filter(str_detect(nome_sub_setor_cnae, "^GERACAO DE ENERGIA ELETRICA - HIDRELETRICA|^GERACAO DE ENERGIA ELETRICA - PCH|^GERACAO DE ENERGIA ELETRICA - TERMICA")) 
+                 
 # Filtrar de acordo com o nome do município
 bndes.energia.cidades <- bndes.energia %>% 
                          select(5,6,23) %>% 
@@ -41,6 +41,7 @@ energia.descricao <- bndes.energia %>%
 
 # criar um vetor com todos os nomes em um elemento e separar os elementos por |
 w <- paste(nomes.amz.legal, collapse = '|') 
+
 # colocar o nome do município na coluna sobre o município
 energia.descricao$muni <- str_extract(energia.descricao$descricao, w)      
 
@@ -50,14 +51,17 @@ energia.descricao <- energia.descricao %>%
                      unique() 
 
 bndes.energia.cidades <- rbind(bndes.energia.cidades,energia.descricao)%>% 
-                         mutate(energia_bndes = 1)
-                    
+                         mutate(energia_bndes = 1) %>% 
+                         select(1,2,4) %>% 
+                         unique()
+
 # Valor agrupado por município
 valor.bndes.energia <- bndes.energia %>% 
                        select(5,6,28) %>% 
                        group_by(muni,cod_muni) %>%
                        summarise(desembolsos_energia_deflac = sum(desembolso_deflac)) %>% 
                        arrange(desc(desembolsos_energia_deflac))
+
 
 # 2 - FINANCIAMENTOS PARA MINERAÇÃO
 bndes.mineracao <- fin.bndes.deflac %>% 
@@ -92,15 +96,42 @@ bndes.petroleo <- fin.bndes.deflac %>%
 
 # Nenhum dos grandes projetos de petróleo foi na Amazônia Legal
 
+
 # Reunir dados
 grandes.projetos.bndes <- full_join(bndes.energia.cidades,bndes.mineracao.cidades) 
 grandes.projetos.bndes[grandes.projetos.bndes$muni == "PEDRA BRANCA DO AMAPARI" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '2310506'
 grandes.projetos.bndes[grandes.projetos.bndes$muni == "ALTAMIRA" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '1500602'
 grandes.projetos.bndes[grandes.projetos.bndes$muni == "SINOP" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '5107909'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "TERRA SANTA" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '1507979'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "JURUENA" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '5105176'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "SAPEZAL" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '5107875'
+grandes.projetos.bndes[grandes.projetos.bndes$muni == "PARECIS" & grandes.projetos.bndes$cod_muni == '0000000', "cod_muni"] <- '1101450'
 
 grandes.projetos.bndes <- grandes.projetos.bndes %>% 
-                          select(2,4,5) %>% 
+                          select(1,2,3,5) %>% 
                           unique()
                           
+grandes.projetos.bndes[is.na(grandes.projetos.bndes)] <- 0
+
 # exportar tabela
-write.csv(grandes.projetos.bndes,file='Outputs/01_tabelas/01_financ_bndes.csv')
+write.csv(grandes.projetos.bndes, file='Outputs/01_tabelas/01_financ_bndes.csv', row.names = F)
+
+
+# Análises extras:
+# Frigoríficos
+bndes.frigo <- fin.bndes.deflac %>% 
+  filter(str_detect(cod_sub_setor_cnae, "^C101"))  
+  select(4,5,6,23) %>% 
+  unique()
+
+# Encontrados: MT (Várzea Grande (class SEM MUNICÍPIO) e Lucas do Rio Verde)
+
+# Papel e Celulose
+bndes.celulose <- fin.bndes.deflac %>% 
+   filter(str_detect(cod_sub_setor_cnae, "^C17")) %>% 
+   select(3,4,5,6,23) %>% 
+   unique() %>% 
+   dplyr::filter(uf %in% uf.amz.legal)
+  
+# Encontrados: Almeirim (PA) e Imperatriz (MA)
+# nenhum classificado como sem município

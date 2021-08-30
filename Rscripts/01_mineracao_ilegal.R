@@ -63,4 +63,10 @@ mineracao.ilegal <- df.pontos %>%
   mutate(minerac_ilegal = 1)
 
 # exportar tabela
-write.csv(mineracao.ilegal,'Outputs/01_tabelas/01_minerac_ilegal.csv')
+write.csv(mineracao.ilegal,'Outputs/01_tabelas/01_minerac_ilegal.csv', row.names = F)
+
+# exportar shapefile da mineração ilegal
+shape.mineracao.ilegal <- left_join(mineracao.ilegal,shape.muni,by=c('code_muni')) %>% 
+  select(-'name_muni')
+
+st_write(shape.mineracao.ilegal, "Outputs/03_mapas/Shapefile mineração ilegal/shape_minerac_ilegal.shp")

@@ -21,4 +21,4 @@ x <- itr.2017 %>%
   mutate(N_category = n()) %>%
   count(N_category)
 
-write.csv(itr.2017,file = 'Outputs/01_tabelas/01_itr_cota_parte.csv')
+write.csv(itr.2017,file = 'Outputs/01_tabelas/01_itr_cota_parte.csv', row.names = F)

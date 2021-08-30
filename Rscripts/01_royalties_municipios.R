@@ -86,7 +86,7 @@ royalties <- full_join(royalties,cidades.amazonia.legal.nome) %>%
              select(1,6,2,3,4,5)
       
 # Exportar arquivo
-write.csv(royalties,file='Outputs/01_tabelas/01_royalties_mineracao_energia.csv',na = '0')
+write.csv(royalties,file='Outputs/01_tabelas/01_royalties_mineracao_energia.csv', na = '0', row.names = F)
 
 # Royalties das cidades intermediadoras da Amazônia Legal
 royalties.intermediadoras <- royalties %>% 

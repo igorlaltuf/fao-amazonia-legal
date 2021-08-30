@@ -2,20 +2,12 @@ rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
+
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
-# Carregar credenciais do data lake base dos dados
-load_dot_env()
-credencial <- Sys.getenv('CREDENCIAL_BASE_DOS_DADOS')
-basedosdados::set_billing_id(credencial)   
-
-# Importar dados populacionais
+# ler os arquivos
+internet <- read.csv('Outputs/00_shapes_e_dados/00_internet_anatel.csv')
 pop.estimada.2019 <- read_excel(path = 'Input/tabela6579_pop_estimada_2019.xlsx')
-
-query <- "SELECT ano, sigla_uf, id_municipio, empresa, sinal, produto, SUM(acessos) as acessos FROM `basedosdados.br_anatel_telefonia_movel.municipio`
-          WHERE ano = 2019
-          GROUP BY ano, sigla_uf, id_municipio, empresa, sinal, produto"
-internet <- read_sql(query)
 
 unique(internet$produto) #Ver as categorias
 
@@ -33,7 +25,10 @@ internet.amzl.2019 <- left_join(internet.amzl.2019,pop.estimada.2019, by = c('id
                       select(1,3,2,4) %>% 
                       mutate(acessos_cada_100_mil_hab = (acessos_2019/pop_resid_estimada_2019)*100000)
 
+# classificar
 internet.amzl.2019 <- classificar.variavel(internet.amzl.2019,'acessos_cada_100_mil_hab','class_acessos_100mil_2019')
+
+write.csv(internet.amzl.2019,'Outputs/02_tabelas/02_internet_4g_AMZL.csv', row.names = F)
 
 x <- internet.amzl.2019 %>% 
      group_by(class_acessos_100mil_2019) %>%

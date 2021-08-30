@@ -27,7 +27,7 @@ x <- covid %>%
 
 mean(covid$obitos_100_mil_ha)
 
-
+# Tabela das cidades intermediadoras e classificação nacional
 tabela.covid <- gt(intermed) %>%
   cols_label(
     city = 'Município',
@@ -58,38 +58,32 @@ tabela.covid <- gt(intermed) %>%
 
 tabela.covid
 
-gtsave(tabela.covid, 'Outputs/Covid_intermediadoras.png')
+gtsave(tabela.covid, 'Outputs/03_mapas/Saúde/Covid_intermediadoras_classif_brasil.png')
 
-write.csv(covid,'Outputs/covid_classificacao.csv')
+write.csv(covid,'Outputs/03_mapas/Saúde/covid_classificacao_brasil.csv')
 
 mean(covid$obitos_100_mil_ha)
 
 # mapa Brasil por município
-shape.muni <- geobr::read_municipality() 
-shape.muni <- left_join(covid,shape.muni, by = c('city_ibge_code'='code_muni'))
+shape.muni <- st_read('Outputs/00_shapes_e_dados/shape.muni.shp')
+
+covid.shape <- left_join(covid, shape.muni, by = c('city_ibge_code' = 'cd_mn'))
 
 # transforma character em factors
-shape.muni$class_obit_100_mil_ha <- as.factor(shape.muni$class_obit_100_mil_ha)
+covid.shape$class_obit_100_mil_ha <- as.factor(covid.shape$class_obit_100_mil_ha)
 
 # define a ordem dos factors (em 6 levels)
-shape.muni$class_obit_100_mil_ha <- factor(shape.muni$class_obit_100_mil_ha, levels = c('Muito Alto','Alto','Médio Alto','Médio Baixo','Baixo','Muito Baixo'))
+covid.shape$class_obit_100_mil_ha <- factor(covid.shape$class_obit_100_mil_ha, levels = c('Muito Alto','Alto','Médio Alto','Médio Baixo','Baixo','Muito Baixo'))
 
 # coord dos pontos
-coord.cidades <- read_municipal_seat(year = 2010,showProgress = T) %>% 
-  dplyr::filter(code_muni %in% cidades.intermediadoras)
+coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
 
-# recorte da amzl com classificação do Brasil # REMOVER PARA VER O MAPA DO BRASIL INTEIRO
-shape.muni <- shape.muni %>% 
-              dplyr::filter(city_ibge_code %in% cidades.amazonia.legal)
-
-
+# Brasil
 # óbitos a cada 100 mil hab
-ggplot(shape.muni)+
-  geom_sf(aes(fill=class_obit_100_mil_ha, geometry = geom), colour = NA)+
+ggplot(covid.shape)+
+  geom_sf(aes(fill=class_obit_100_mil_ha, geometry = geometry), colour = NA)+
   scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
-  geom_point(data = coord.cidades, aes(geometry = geom), stat = "sf_coordinates")+
-  geom_sf_text(data = coord.cidades, aes(label = name_muni), colour='grey10',vjust=1.3, size = 1.8) +
-  labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
+  labs(fill= 'Classificação dos óbitos a \n cada 100 mil habitantes', y=NULL, x=NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location='tl', 
@@ -97,53 +91,4 @@ ggplot(shape.muni)+
   theme_classic()+ # retira o grid e coloca o fundo branco
   theme(legend.position = 'bottom')
 
-
-ggsave('Outputs/covid_nacional.png', width = 9, height = 6)
-
-
-# estabelecimentos de saúde
-cnes <- read_health_facilities()
-cnes <- cnes %>% 
-  dplyr::filter(abbrev_state %in% uf.amz.legal)
-
-
-ggplot(shape.muni)+
-  geom_sf(aes(fill=class_obit_100_mil_ha, geometry = geom), colour = NA)+
-  scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
-  geom_point(data = cnes, aes(geometry = geom), stat = "sf_coordinates", size = .05)+
-  labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
-  coord_sf(crs = 4674) +
-  annotation_scale(location = 'br')+
-  annotation_north_arrow(location='tl', 
-                         style = north_arrow_fancy_orienteering())+
-  theme_classic()+ # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
-
-
-
-
-
-
-
-
-
-
-
-# óbitos (desenvolver mais)
-ggplot(shape.muni)+
-  geom_sf(aes(fill=last_available_deaths/1000, geometry = geom), colour = NA)+
-  scale_fill_gradientn(colours = brewer.pal(10,"YlOrRd"))+
-  # scale_fill_manual(values = rev(brewer.pal(6,"BuPu")))+
-  labs(fill= 'Classificação dos óbitos a cada 100 mil habitantes') + #Muda o nome da legenda com o fill.
-  coord_sf(crs = 4674) +
-  annotation_scale(location = 'br')+
-  annotation_north_arrow(location='tl', 
-                         style = north_arrow_fancy_orienteering())+
-  theme_classic()+ # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
-
-
-
-
-
-
+ggsave('Outputs/03_mapas/Saúde/covid_obitos_brasil.png', width = 9, height = 6)

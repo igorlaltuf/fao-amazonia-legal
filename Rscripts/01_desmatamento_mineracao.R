@@ -101,4 +101,4 @@ desmatamento.mineracao <- classificar.variavel(desmatamento.mineracao,'total','c
 desmatamento.mineracao <- left_join(desmatamento.mineracao,cidades.amazonia.legal.nome,by='cod_muni') %>%  # colocar nomes corretos dos municípios
   select(1,5,3,4)              
 
-write.csv(desmatamento.mineracao,'Outputs/01_tabelas/01_desmatamento_mineracao.csv')
+write.csv(desmatamento.mineracao,'Outputs/01_tabelas/01_desmatamento_mineracao.csv', row.names = F)

@@ -76,5 +76,5 @@ desmatamento.interm.bacias <- desmatamento.bacias %>%
 
 
 # Exportar
-write.csv(desmatamento, file='Outputs/01_tabelas/01_desmatamento_agro.csv')
-write.csv(desmatamento.bacias, file='Outputs/01_tabelas/01_desmatamento_bacias_energia.csv')
+write.csv(desmatamento, file='Outputs/01_tabelas/01_desmatamento_agro.csv',row.names = F)
+write.csv(desmatamento.bacias, file='Outputs/01_tabelas/01_desmatamento_bacias_energia.csv',row.names = F)

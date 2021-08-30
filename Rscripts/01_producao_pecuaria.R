@@ -18,7 +18,7 @@ x <- gado %>%
   count(N_category)
 
 # Exportar arquivo
-write.csv(gado,file='Outputs/01_tabelas/01_prod_gado.csv',na = '0')
+write.csv(gado,file='Outputs/01_tabelas/01_prod_gado.csv', na = '0', row.names = F)
 
 gado.intermed <- gado %>% 
          dplyr::filter(cod_muni %in% cidades.intermediadoras)

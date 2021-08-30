@@ -293,7 +293,7 @@ infra.logistica.acumulada <- infra.logistica %>% select(1,2,9,10)
 
 
 # Exportar 
-write.csv(infra.logistica.acumulada, file='Outputs/01_tabelas/01_infra_logistica.csv')
+write.csv(infra.logistica.acumulada, file='Outputs/01_tabelas/01_infra_logistica.csv', row.names = F)
 
 # Verificar as cidades intermediadoras
 intermed <- infra.logistica.acumulada %>% 

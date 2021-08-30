@@ -50,4 +50,4 @@ inter <- prod.agro %>%
          dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
 # Exportar arquivo
-write.csv(prod.agro,file='Outputs/01_tabelas/01_producao_agro.csv',na = '0')
+write.csv(prod.agro,file='Outputs/01_tabelas/01_producao_agro.csv',na = '0',row.names = F)

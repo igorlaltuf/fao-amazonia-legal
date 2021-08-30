@@ -70,4 +70,4 @@ medios.e.grandes.inter <- full_join(cidades.amazonia.legal.nome,medios.e.grandes
                     dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
 # Salvar arquivo
-write.csv(medios.e.grandes,file='Outputs/01_tabelas/01_medios_e_grandes_estab_agropec.csv',na = '0')
+write.csv(medios.e.grandes,file='Outputs/01_tabelas/01_medios_e_grandes_estab_agropec.csv',na = '0',row.names = F)

@@ -18,4 +18,5 @@ library(stringi) # para remover caracteres especiais
 library(RColorBrewer) # paletas de cores
 library(ggspatial) # elementos para os mapas
 library(patchwork) # juntar gráficos na mesma figura
+library(gt) # fazer tabelas
 # removi o pacote plyr porque estava dando conflito com as funções do dplyr que eu já havia utilizado

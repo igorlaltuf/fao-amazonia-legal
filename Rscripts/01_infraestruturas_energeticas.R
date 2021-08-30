@@ -97,32 +97,4 @@ geracao.amzl <- left_join(cidades.amazonia.legal.nome, infra.bacias.amzl, by = c
 geracao.amzl <- left_join(geracao.amzl, infra.energetica.termicas, by = c('cod_muni','muni'))
 geracao.amzl[is.na(geracao.amzl)] <- 0
 
-write.csv(geracao.amzl,file = 'Outputs/01_tabelas/01_geracao_energia_amzl.csv')
-
-
-### 2 - Transmissão
-
-
-
-
-
-### 3 - Distribuição
-
-
-
-
-
-
-
-
-# EXPORTAR em csv e enviar no excel!
-
-
-
-# ver se nos financiamentos do BNDES também filtro apenas essas UHE de energia hidreletrica
-# Ver região de influencia dos empreendimentos EIA RIMA e tabelular
-
-# Belo monte começou a operar depois de 2015, por isso não consta aqui. Ver nos financiamentos do BNDES as que surgiram depois!
-# e incluir aqui!!!
-
-
+write.csv(geracao.amzl,file = 'Outputs/01_tabelas/01_geracao_energia_amzl.csv',row.names = F)
