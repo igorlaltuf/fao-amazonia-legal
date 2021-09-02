@@ -433,15 +433,3 @@ tabela.datasus <- gt(leitos.intermediadoras) %>%
 
 tabela.datasus
 gtsave(tabela.datasus, 'Outputs/03_mapas/Saúde/03_tabela_leitos_sus.png')
-
-
-
-
-
-
-
-# COMEÇAR A ESCREVER O RELATÓRIO!
-# dados de mineração q Luis enviou e como encaixar no texto e se bate
-# Ver regic com ligações na área da saúde
-
-
