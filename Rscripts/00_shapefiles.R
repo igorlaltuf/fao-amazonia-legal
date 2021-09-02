@@ -57,6 +57,3 @@ st_write(pontos.cnes, 'Outputs/00_shapes_e_dados/shape.cnes.brasil.shp', append 
 pontos.cnes.amzl <- pontos.cnes %>%
   dplyr::filter(uf %in% uf.amz.legal)
 st_write(pontos.cnes.amzl, 'Outputs/00_shapes_e_dados/shape.cnes.amzl.shp', append = F)
-
-
-

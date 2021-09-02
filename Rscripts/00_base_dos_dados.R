@@ -54,3 +54,37 @@ query <- "SELECT id_municipio, ano, cnae_2, SUM(numero_vinculos) as vinculos FRO
 df <- read_sql(query)
 df$cnae_2 <- as.character(df$cnae_2)
 write.csv(df,'Outputs/00_shapes_e_dados/00_rais_vinculos_2019.csv', row.names = F)
+
+# Pacote microdatasus
+# 1 - Dados de estabelecimentos
+
+# Cruzar dados abaixo com tipo de estabelecimento de saúde do datasus para saber onde estão os hospitais, upas etc
+# algumas colunas só aparecem quando eu faço a requisição especificamente pelo seu nome (NIVATE_H e URGEMERG).
+# Por isso eu selecionei as colunas que preciso.
+
+var.cnes.st <- c('CNES','CODUFMUN','VINC_SUS','TPGESTAO','TP_UNID','TURNO_AT','GESPRG1E', 
+                 'GESPRG1M','GESPRG2E','GESPRG2M','GESPRG4E','GESPRG4M','GESPRG5E','GESPRG5M', 
+                 'GESPRG6E','GESPRG6M','NIVATE_A','NIVATE_H','URGEMERG')
+
+x <- fetch_datasus(year_start = 2019,
+                   year_end = 2019, 
+                   month_start = 1, 
+                   month_end = 12, 
+                   uf = uf.amz.legal, 
+                   information_system = "CNES-ST", 
+                   vars = var.cnes.st)
+
+write.csv(x,'Outputs/00_shapes_e_dados/00_cnes_st_2019.csv', row.names = F)
+
+# 2 - Dados de Leitos
+var.cnes.lt <- c('CNES','CODUFMUN','TP_UNID','TP_LEITO','CODLEITO','QT_EXIST','QT_CONTR','QT_SUS','QT_NSUS')
+
+y <- fetch_datasus(year_start = 2019,
+                   year_end = 2019, 
+                   month_start = 1, 
+                   month_end = 12, 
+                   uf = uf.amz.legal, 
+                   information_system = "CNES-LT",
+                   var = var.cnes.lt)
+
+write.csv(y,'Outputs/00_shapes_e_dados/00_cnes_lt_2019.csv', row.names = F)

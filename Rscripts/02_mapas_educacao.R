@@ -9,7 +9,6 @@ setwd('F:/Meu repositório/fao-amazonia-legal/')
 tabela <- read.csv('Outputs/01_tabelas/01_escolas_publicas_AMZL_2009_2020.csv')
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
 
-
 # matrículas AMZL (quanto maior melhor)
 # dados 2019 
 dados.2019 <- tabela %>% 
@@ -34,13 +33,15 @@ matr.2019 <- ggplot(dados.2019)+
                     label = c('demais faixas','Alto/Muito alto')) +
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Matrículas a cada 100 mil \n habitantes em 2019', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill= '', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  ggtitle('Matrículas a cada 100 mil habitantes em 2019')+
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
 
 # Mapa de Escolas 2019
 esc.2019 <- ggplot(dados.2019)+
@@ -50,13 +51,15 @@ esc.2019 <- ggplot(dados.2019)+
                     label = c('demais faixas','Alto/Muito alto')) +
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Escolas a cada 100 mil \n habitantes em 2019', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill= '', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  ggtitle('Escolas a cada 100 mil habitantes em 2019')+
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
 
 
 # Dados 2009
@@ -81,30 +84,36 @@ matr.2009 <- ggplot(dados.2009) +
                     label = c('demais faixas','Alto/Muito alto')) +
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Matrículas a cada 100 mil \n habitantes em 2009', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill= '', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  ggtitle('Matrículas a cada 100 mil habitantes em 2009')+
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
+
 
 # Mapa de escolas 2009
-esc.2009 <- ggplot(dados.2009)+
+esc.2009 <- ggplot(dados.2009) +
   geom_sf(aes(fill = escol_100, geometry = geometry), colour = NA) +
   scale_fill_manual(breaks = c('0','1'),
                     values=c('#fee8c8','#e34a33'),
                     label = c('demais faixas','Alto/Muito alto')) +
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Escolas a cada 100 mil \n habitantes em 2009', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill= '', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  ggtitle('Escolas a cada 100 mil habitantes em 2009')+
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
-
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
+  
+  
 # reunir mapas com patchwork
 (esc.2009|esc.2019)/
 (matr.2009|matr.2019)
@@ -124,26 +133,62 @@ shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 
 
 
-#### CONTINUAR DAQUI!!!! MUDAR LEGENDA DE LINHA PARA PONTOS
-# COLOCAR R COLOR BREWER PARA MELHORAR CORES
-ggplot(shape.estad.amzl) +
-  geom_sf(aes(geometry = geometry)) +
+# IMPORTANTE: avisar que faltam as coordenadas de mais da metade das escolas!!!
+# Não usar no produto final.
+# Escolas em 2009 
+base.2009 <- read.csv('Outputs/00_shapes_e_dados/00_base_escolas_2009_2020.csv') %>% 
+  dplyr::filter(ano == 2009)
+pontos.2009 <- left_join(base.2009, pontos.escolas, by = c('id_escola' = 'id_esc'))   
+
+
+pontos.esc.2009 <- ggplot() +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  geom_point(data = pontos.escolas, aes(geometry = geometry, col = 'Escolas'), stat = "sf_coordinates", size = .05, show.legend = 'point') +
-  scale_colour_discrete("") + # muda o título da legenda (remove o color)
+  geom_sf(data = pontos.2009, aes(geometry = geometry, col = 'Escolas'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
+  scale_color_manual(values = c("Escolas" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+                     name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
+                                                              shape=c(16, NA)))) +
+  ggtitle('Escolas em 2009') +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
   
 
-ggsave('Outputs/03_mapas/Educação/03_escolas_2020_amzl.png', scale = 3)
+
+# Escolas em 2019 
+base.2019 <- read.csv('Outputs/00_shapes_e_dados/00_base_escolas_2009_2020.csv') %>% 
+  dplyr::filter(ano == 2019)
+pontos.2019 <- left_join(base.2019, pontos.escolas, by = c('id_escola' = 'id_esc'))   
 
 
+pontos.esc.2019 <- ggplot() +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
+  geom_sf(data = pontos.2019, aes(geometry = geometry, col = 'Escolas'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
+  scale_color_manual(values = c("Escolas" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+                     name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
+                                                              shape=c(16, NA)))) +
+  ggtitle('Escolas em 2019') +
+  labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  coord_sf(crs = 4674) +
+  annotation_scale(location = 'br')+
+  annotation_north_arrow(location = 'tl', 
+                         style = north_arrow_fancy_orienteering()) +
+  theme_classic() + # retira o grid e coloca o fundo branco
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
 
+
+pontos.esc.2009|pontos.esc.2019
+
+ggsave('Outputs/03_mapas/Educação/03_escolas_pontos_amzl_não_usar.png', scale = 2)
 
 
 # Tabela das intermediadoras 
@@ -203,6 +248,7 @@ tabela.educacao
 
 gtsave(tabela.educacao, 'Outputs/03_mapas/Educação/03_tabela_educacao.png')
 
+
 # Gráficos Altamira (exemplo)
 cidade <- tabela %>% 
   dplyr::filter(cod_muni == 1500602) # altamira
@@ -233,3 +279,99 @@ d <- ggplot(cidade, aes(x = ano, y = escol_100_mil)) +
 
 (a|b)/
 (c|d)
+
+ggsave('Outputs/03_mapas/Educação/03_grafico_altamira.png')
+
+
+
+
+# tabela por faixas - Matrículas 2009 e 2019
+matr.tab.2009 <- dados.2009 %>% 
+  select('cod_muni','muni','matr_100_mil','class_matr_100_mil')
+matr.tab.2019 <- dados.2019 %>% 
+  select('cod_muni','muni','matr_100_mil','class_matr_100_mil')
+matr.2009.2019 <- left_join(matr.tab.2009, matr.tab.2019, by = c('cod_muni','muni')) %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras) %>% 
+  arrange(desc(matr_100_mil.x))
+
+
+tabela.educacao <- gt(matr.2009.2019) %>%
+  cols_label(
+    muni = 'Município',
+    matr_100_mil.x = 'Matrículas a cada 100 mil \n habitantes em 2009',
+    class_matr_100_mil.x = 'Classificação das matrículas \n em 2009',
+    matr_100_mil.y = 'Matrículas a cada 100 mil \n habitantes em 2019',
+    class_matr_100_mil.y = 'Classificação das matrículas \n em 2019'
+  ) %>% 
+  tab_header(
+    title = 'Quantidade de matrículas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
+    subtitle = '2009 e 2019'
+  ) %>%
+  cols_hide(
+    columns = cod_muni
+  ) %>% 
+  fmt_markdown(
+    columns = c(muni, class_matr_100_mil.x, class_matr_100_mil.y)
+  ) %>% 
+  fmt_number(
+    columns = c(matr_100_mil.x, matr_100_mil.y),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  ) %>% 
+  tab_source_note('Fonte: Elaboração própria. Censo Escolar (INEP) via Carabetta, João; Dahis, Ricardo; Israel, Fred; Scovino, Fernanda (2020) \n Base dos Dados: Repositório de Dados Abertos em https://basedosdados.org.')
+
+
+tabela.educacao
+
+gtsave(tabela.educacao, 'Outputs/03_mapas/Educação/03_tabela_educacao_matric.png')
+
+
+# tabela por faixas - Escolas 2009 e 2019
+escol.tab.2009 <- dados.2009 %>% 
+  select('cod_muni','muni','escol_100_mil','class_escol_100_mil')
+
+escol.tab.2019 <- dados.2019 %>% 
+  select('cod_muni','muni','escol_100_mil','class_escol_100_mil')
+
+escol.2009.2019 <- left_join(escol.tab.2009, escol.tab.2019, by = c('cod_muni','muni')) %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras) %>% 
+  arrange(desc(escol_100_mil.x))
+
+
+tabela.educacao <- gt(escol.2009.2019) %>%
+  cols_label(
+    muni = 'Município',
+    escol_100_mil.x = 'Escolas a cada 100 mil \n habitantes em 2009',
+    class_escol_100_mil.x = 'Classificação das escolas \n em 2009',
+    escol_100_mil.y = 'Escolas a cada 100 mil \n habitantes em 2019',
+    class_escol_100_mil.y = 'Classificação das escolas \n em 2019'
+  ) %>% 
+  tab_header(
+    title = 'Quantidade de escolas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
+    subtitle = '2009 e 2019'
+  ) %>%
+  cols_hide(
+    columns = cod_muni
+  ) %>% 
+  fmt_markdown(
+    columns = c(muni, class_escol_100_mil.x, class_escol_100_mil.y)
+  ) %>% 
+  fmt_number(
+    columns = c(escol_100_mil.x, escol_100_mil.y),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  ) %>% 
+  tab_source_note('Fonte: Dados do Censo Escolar (INEP) via Carabetta, João; Dahis, Ricardo; Israel, Fred; Scovino, Fernanda (2020) \n Base dos Dados: Repositório de Dados Abertos em https://basedosdados.org.')
+
+
+tabela.educacao
+
+gtsave(tabela.educacao, 'Outputs/03_mapas/Educação/03_tabela_educacao_escol.png')
