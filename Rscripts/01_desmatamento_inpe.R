@@ -1,4 +1,4 @@
-# Desmatamento nos municípios da AMZL -INPE
+# Desmatamento nos municípios da AMZL -INPE http://www.dpi.inpe.br/prodesdigital/prodesmunicipal.php
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')

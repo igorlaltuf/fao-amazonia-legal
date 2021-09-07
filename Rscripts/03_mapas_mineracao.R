@@ -25,7 +25,8 @@ mineracao <- left_join(mineracao,shape.muni, by = c('cod_muni'='cd_mn')) %>%
 
 # coordenadas das cidades intermediadoras
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
-   
+
+sf_use_s2(FALSE)
 ferrovias <- st_intersection(ferrovias, shape.muni)
 hidrovias <- st_intersection(hidrovias, shape.muni)
 
@@ -40,21 +41,22 @@ ggplot(mineracao)+
   scale_colour_discrete("") + # muda o título da legenda
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill= 'Classificação de mineração na \n Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill= 'Classificação de mineração na\nAmazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        legend.title = element_text(size = 9))
 
 # salvar mapa
-ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png', scale = 2)
+ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png', scale = 1.1)
 
 # 2 - Mapas dos indicadores separados
 x <- c('emprego_mineracao','royalties_cfem','mineracao_bndes',
        'infra_mineral','desmatamento_minerac','minerac_ilegal')
-y <- c('Empregos formais na \n mineração','Royalties CFEM','Grandes desembolsos \n BNDES',
+y <- c('Empregos formais na\nmineração','Royalties CFEM','Grandes desembolsos\nBNDES',
        'Infraestrutura de apoio', 'Desmatamento','Mineração ilegal')
 
 # transformar de numeric para factor
@@ -72,8 +74,8 @@ while(i<=length(x)){
     scale_fill_manual(breaks = c('0','1'),
                       values=c('#fee8c8','#e34a33'),
                       label = c('demais faixas','Alto/Muito alto')) +
-    geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .5) +
-    geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2) +
+    #geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .5) +
+    #geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2) +
     labs(fill = y[i], x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
     coord_sf(crs = 4674) +
     annotation_scale(location = 'br')+
@@ -95,4 +97,24 @@ mapa.4 <- mapa.4 + scale_fill_manual(breaks = c('0','1'),
 (mapa.1 | mapa.2)/
 (mapa.3 | mapa.5)/
 (mapa.4 | mapa.6)
-ggsave('Outputs/03_mapas/Mineração/indicadores_juntos_mineral.png', scale = 3)
+ggsave('Outputs/03_mapas/Mineração/indicadores_juntos_mineral.png', scale = 1.75)
+
+
+
+mapa.1
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_1.png', scale = 1.3)
+
+mapa.2
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_2.png', scale = 1.3)
+
+mapa.3
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_3.png', scale = 1.3)
+
+mapa.4
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_4.png', scale = 1.3)
+
+mapa.5
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_5.png', scale = 1.3)
+
+mapa.6
+ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_6.png', scale = 1.3)

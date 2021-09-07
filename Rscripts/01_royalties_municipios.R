@@ -39,6 +39,35 @@ x <- royalties.anp.petroleo %>%
      mutate(N_category = n()) %>%
      count(N_category)
 
+inter <- royalties.anp.petroleo %>% 
+  dplyr::filter(royalties_anp_petroleo > 1000000) %>% 
+  arrange(desc(royalties_anp_petroleo))
+
+tabela.agro <- gt(inter) %>%
+  cols_label(
+    muni = 'Município',
+    royalties_anp_petroleo = 'Valor dos Royalties ANP'
+  ) %>% 
+  cols_hide(
+    columns = c(cod_muni,class_royalties_anp_petroleo)
+  ) %>% 
+  fmt_markdown(
+    columns = c(muni)
+  ) %>% 
+  fmt_number(
+    columns = c(royalties_anp_petroleo),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  )
+
+tabela.agro
+gtsave(tabela.agro, 'Outputs/03_mapas/Outros/03_tabela_royalties_petroleo.png')
+
+
 # 3 - Classificar Royalties de Petróleo FEP - Repartição todos os municípios
 royalties.fep.petroleo <- royalties %>% 
                           select(1,2,6) %>% 

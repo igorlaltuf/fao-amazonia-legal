@@ -11,7 +11,7 @@ fin.bndes.original <- read_excel('Input/bndes_financiamentos.xlsx')
 which(is.na(fin.bndes.original$valor_contratado_corrente)) # retorna a linha dos NAs se existirem
 
 fin.bndes.deflac <- fin.bndes.original %>% 
-                    mutate(fin.bndes.original,desembolso_deflac = deflate(valor_desembolsado_corrente,as.Date(ymd(fin.bndes.original$data_contrato)),'04/2021','igpdi')) %>% 
+                    mutate(fin.bndes.original, desembolso_deflac = deflate(valor_desembolsado_corrente,as.Date(ymd(fin.bndes.original$data_contrato)),'04/2021','igpdi')) %>% 
                     dplyr::filter(desembolso_deflac >= 40000000 & 
                     porte_cliente == 'GRANDE' &
                     natureza_cliente == 'PRIVADA') #filtra os grandes investimentos (acima de R$ 40 milhões de 2021)

@@ -19,6 +19,7 @@ st_crs(z)
 st_crs(shape.muni)
 
 # 1 - pontos de mineração 
+sf_use_s2(F)
 df1 <- st_intersection(shape.muni,st_buffer(y, 0))
 
 df.pontos <- df1 %>% 

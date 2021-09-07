@@ -49,9 +49,11 @@ shape.muni.amzl <- st_read('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
 shape.estad.amzl <- st_read('Outputs/00_shapes_e_dados/shape.estad.amzl.shp')
 shape.hidrovia <- read_sf('Input/shapes logística/hidrovias/Hidrovias.shp') %>% 
   dplyr::filter(cla_icacao %in% c('Navegável', 'Navegação sazonal'))
+sf_use_s2(FALSE)
 shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 
 # Todos os casos tem vínculo com sus
+# dados de 2015 dos pontos
 # CNES com vínculo com SUS
 a <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
@@ -404,7 +406,7 @@ leitos.intermediadoras <- leitos %>%
   dplyr::filter(CODUFMUN %in% cidades.inter.6.dig)
 
 # tabela leitos
-tabela.datasus <- gt(leitos.intermediadoras) %>%
+tabela.leitos <- gt(leitos.intermediadoras) %>%
   cols_label(
     muni = 'Município',
     qtd_leitos_sus_100_mil = 'Quantidade de leitos do SUS \n para cada 100 mil habitantes',
@@ -431,5 +433,5 @@ tabela.datasus <- gt(leitos.intermediadoras) %>%
   ) %>% 
   tab_source_note('Fonte: Elaboração própria. SALDANHA, Raphael de Freitas; BASTOS, Ronaldo Rocha; BARCELLOS, Christovam. Microdatasus: pacote para download e pré-processamento de microdados do Departamento de Informática do SUS (DATASUS). Cad. Saúde Pública, Rio de Janeiro , v. 35, n. 9, e00032419, 2019 . Available from http://ref.scielo.org/dhcq3y.')
 
-tabela.datasus
-gtsave(tabela.datasus, 'Outputs/03_mapas/Saúde/03_tabela_leitos_sus.png')
+tabela.leitos
+gtsave(tabela.leitos, 'Outputs/03_mapas/Saúde/03_tabela_leitos_sus.png')

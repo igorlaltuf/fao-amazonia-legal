@@ -34,3 +34,39 @@ x <- internet.amzl.2019 %>%
      group_by(class_acessos_100mil_2019) %>%
      mutate(N_category = n()) %>%
      count(N_category)
+
+intermed <- internet.amzl.2019 %>% 
+  dplyr::filter(id_municipio %in% cidades.intermediadoras) %>% 
+  arrange(desc(acessos_cada_100_mil_hab))
+
+
+# fazer tabela
+tabela.internet <- gt(intermed) %>%
+  cols_label(
+    muni = 'Município',
+    acessos_cada_100_mil_hab = 'Acessos a cada\n100 mil habitantes',
+    class_acessos_100mil_2019 = 'Classificação dos acessos'
+  ) %>% 
+  tab_header(
+    title = 'Acessos à internet via rede 4G',
+    subtitle = '2019'
+  ) %>% 
+  cols_hide(
+    columns = c(id_municipio,acessos_2019,pop_resid_estimada_2019)
+  ) %>% 
+  fmt_markdown(
+    columns = c(muni, class_acessos_100mil_2019)
+  ) %>% 
+  fmt_number(
+    columns = c(acessos_cada_100_mil_hab),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  ) %>% 
+  tab_source_note('Fonte: Elaboração própria. Microdados da ANATEL (2019) via Carabetta, João; Dahis, Ricardo; Israel, Fred; Scovino, Fernanda (2020) Base dos Dados: Repositório de Dados Abertos em https://basedosdados.org.')
+
+tabela.internet
+gtsave(tabela.internet, 'Outputs/03_mapas/Internet/03_tabela_internet.png')

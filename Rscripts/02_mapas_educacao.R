@@ -129,6 +129,7 @@ unique(pontos.escolas$tipo)
 shape.estad.amzl <- st_read('Outputs/00_shapes_e_dados/shape.estad.amzl.shp')
 shape.hidrovia <- read_sf('Input/shapes logística/hidrovias/Hidrovias.shp') %>% 
   dplyr::filter(cla_icacao %in% c('Navegável', 'Navegação sazonal'))
+sf_use_s2(FALSE)
 shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 
 
@@ -375,3 +376,40 @@ tabela.educacao <- gt(escol.2009.2019) %>%
 tabela.educacao
 
 gtsave(tabela.educacao, 'Outputs/03_mapas/Educação/03_tabela_educacao_escol.png')
+
+
+# CAMPI IES Federais
+# Fonte: http://www.litoral.ufpr.br/portal/observatoriolitoral/geodados/arquivos-shapefile/
+# http://www.litoral.ufpr.br/portal/observatoriolitoral/wp-content/uploads/sites/20/2019/09/DADOS-GEORREFERENCIADOS-DOS-CAMPI-DAS-UNIVERSIDADES-FEDERAIS-COMO-INSTRUMENTO-DE-GEST%C3%83O-DA-INFORMA%C3%87%C3%83O-PELO-FORCAMPI.pdf
+
+x <- st_read('Input/shape IES/334-IFES-shape-e-kml/Forcampi_c_Litoral_Final.shp')
+shape.estad <- st_read('Outputs/00_shapes_e_dados/shape.estad.shp')
+
+
+ggplot() +
+  geom_sf(data = shape.estad, aes(geometry = geometry), fill = NA) +
+  geom_sf(data = x, aes(geometry = geometry, 
+                        col = 'Campi e multicampi das Universidades Federais'), 
+          size = .7, 
+          show.legend = 'point') +
+  scale_color_manual(values = c("Campi e multicampi das Universidades Federais" = "#31a354"),
+                     name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("blank"),
+                                                              shape=c(16)))) +
+  labs(x = NULL, y = NULL) +
+  ggtitle('Campi e multicampi das Universidades Federais em 2018') +
+  coord_sf(crs = 4674) +
+  annotation_scale(location = 'br')+
+  annotation_north_arrow(location = 'tl', 
+                         style = north_arrow_fancy_orienteering()) +
+  theme_classic() + # retira o grid e coloca o fundo branco
+  theme(legend.position = 'bottom',
+        plot.title = element_text(hjust = 0.5))
+
+ggsave('Outputs/03_mapas/Educação/03_mapa_campi_IES.png', scale = 2)  
+
+
+
+
+
+

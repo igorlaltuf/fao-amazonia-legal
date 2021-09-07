@@ -15,7 +15,7 @@ desmatamento <- read.csv('Outputs/01_tabelas/01_desmatamento_bacias_energia.csv'
 
 # Empregos Energia
 empregos.rais.energia <- empregos.energia %>% 
-                         select('cod_muni','muni','qtd_empregos_energia','class_empregos_agro') %>% 
+                         select('cod_muni','muni','qtd_empregos_energia','class_empregos_energia') %>% 
                          mutate(pont_empregos_energia = ifelse(empregos.energia$class_empregos_energia %in% c('Alto','Muito Alto'),1,0))
 
 # Royalties
@@ -54,3 +54,6 @@ sintese.energia <- sintese.energia %>%
 
 # Exportar tabela
 write.csv(sintese.energia, file='Outputs/02_tabelas/02_subconjunto_energia.csv', row.names = F)
+
+x <- sintese.energia %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras)

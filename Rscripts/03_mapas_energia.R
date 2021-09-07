@@ -26,7 +26,10 @@ st_crs(shape.muni)
 linhas.de.transmissao <- st_transform(linhas.de.transmissao, crs = 4674)
 
 # remover as linhas de transmissão fora da amzl
+sf_use_s2(FALSE)
 linhas.de.transmissao <- st_intersection(linhas.de.transmissao,shape.muni)
+# após a atualização do sf 1.0, precuso usar sf_use_sf2(FALSE)
+
 
 # 1 - Mapa do somatório dos indicadores
 ggplot(energia)+
@@ -37,23 +40,24 @@ ggplot(energia)+
   scale_colour_discrete("") + # remove título da legenda
   geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates",size = 1) +
   geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
-  labs(fill = 'Classificação da geração de \n energia elétrica na Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
+  labs(fill = 'Classificação da geração de\nenergia elétrica na Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br') +
   annotation_north_arrow(location = 'tl', 
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom',
+        legend.title = element_text(size = 9))
 
-ggsave('Outputs/03_mapas/Energia/03_sintese_energia.png', scale = 1.3)
+ggsave('Outputs/03_mapas/Energia/03_sintese_energia.png', scale = 1.1)
 
 # 2 - Mapas dos indicadores separados
 x <- c('pont_empregos_energia','pont_royalties_energia_cfh','pont_financ_bndes',
        'existe_UTE','existe_UHE_PCH','pont_desm_bacia')
 
-y <- c('Empregos no setor de geração \n de energia elétrica','Royalties de energia \n elétrica - CFH',
-       'Grande projeto apoiado \n pelo BNDES','Existência de UTE', 'Existência de PCH ou UHE',
-       'Desmatamento em região de \n bacia hidrográfica')
+y <- c('Empregos no setor de geração\nde energia elétrica','Royalties de energia\nelétrica - CFH',
+       'Grandes projetos apoiados\npelo BNDES','Existência de UTE', 'Existência de PCH ou UHE',
+       'Desmatamento em região de\nbacia hidrográfica')
 
 # transformar de numeric para factor
 energia$pont_empregos_energia <- as.factor(energia$pont_empregos_energia)
@@ -70,8 +74,8 @@ while(i<=length(x)){
     scale_fill_manual(breaks = c('0','1'),
                       values=c('#e5f5f9','#2ca25f'),
                       label = c('demais faixas','Alto/Muito alto')) +
-    geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .5) +
-    geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2) +
+    # geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .5) +
+    # geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2) +
     labs(fill = y[i], x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
     coord_sf(crs = 4674) +
     annotation_scale(location = 'br')+
@@ -122,4 +126,4 @@ ggsave('Outputs/03_mapas/Energia/03_energia_indicadores_6.png', scale = 1.3)
 (mapa.1 | mapa.2)/
 (mapa.3 | mapa.5)/
 (mapa.4 | mapa.6)
-ggsave('Outputs/03_mapas/Energia/indicadores_juntos_energia.png', scale = 3)
+ggsave('Outputs/03_mapas/Energia/indicadores_juntos_energia.png', scale = 1.75)

@@ -38,7 +38,79 @@ x <- cnae.frigo %>%
   mutate(N_category = n()) %>%
   count(N_category)
 
+inter <- cnae.frigo %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras &
+                class_empregos_frigo %in% c('Alto', 'Muito Alto'))
 
+
+tabela.frigo <- gt(inter) %>%
+  cols_label(
+    muni = 'Município',
+    empregos_frigo = 'Quantidade de vínculos ativos no abate\n e fabricação de produtos de carne',
+    class_empregos_frigo = 'Classificação da quantidade\nde vínculos ativos'
+  ) %>% 
+  tab_header(
+    title = 'Cidades intermediadoras com quantidade alta ou muito alta\nde vínculos ativos no abate e fabricação de produtos de carne da Amazônia Legal',
+    subtitle = '2019'
+  ) %>% 
+  cols_hide(
+    columns = c(cod_muni)
+  ) %>% 
+  fmt_markdown(
+    columns = c(empregos_frigo, class_empregos_frigo)
+  ) %>% 
+  fmt_number(
+    columns = c(empregos_frigo),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  ) %>% 
+  tab_source_note('Fonte: Elaboração própria. Dados da RAIS de 2019 via Carabetta, João; Dahis, Ricardo; Israel, Fred; Scovino, Fernanda (2020) Base dos Dados: Repositório de Dados Abertos em https://basedosdados.org.')
+
+tabela.frigo
+gtsave(tabela.frigo, 'Outputs/03_mapas/Outros/03_tabela_frigo_intermediadoras.png')
+
+
+
+
+cnae.frigo <- cnae.frigo %>% 
+  dplyr::filter(class_empregos_frigo %in% 'Muito Alto')
+
+tabela.frigo <- gt(cnae.frigo) %>%
+  cols_label(
+    muni = 'Município',
+    empregos_frigo = 'Quantidade de vínculos ativos no abate\n e fabricação de produtos de carne',
+    class_empregos_frigo = 'Classificação da quantidade\nde vínculos ativos'
+  ) %>% 
+  tab_header(
+    title = 'Municípios com quantidade muito alta de vínculos ativos\n no abate e fabricação de produtos de carne da Amazônia Legal',
+    subtitle = '2019'
+  ) %>% 
+  cols_hide(
+    columns = c(cod_muni)
+  ) %>% 
+  fmt_markdown(
+    columns = c(empregos_frigo, class_empregos_frigo)
+  ) %>% 
+  fmt_number(
+    columns = c(empregos_frigo),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  ) %>% 
+  tab_source_note('Fonte: Elaboração própria. Dados da RAIS de 2019 via Carabetta, João; Dahis, Ricardo; Israel, Fred; Scovino, Fernanda (2020) Base dos Dados: Repositório de Dados Abertos em https://basedosdados.org.')
+
+tabela.frigo
+gtsave(tabela.frigo, 'Outputs/03_mapas/Outros/03_tabela_frigo.png')
+
+
+########### CONTINUAR DAQUI!
 # Mapa
 cnae.frigo$class_empregos_frigo <- as.factor(cnae.frigo$class_empregos_frigo)
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
@@ -49,8 +121,6 @@ cnae.frigo <- left_join(shape.muni.amzl, cnae.frigo, by = c('cd_mn'='cod_muni'))
 
 st_geometry(cnae.frigo)
 
-
-########### CONTINUAR DAQUI!
 ggplot(cnae.frigo)+
   geom_sf(aes(fill = class_empregos_frigo), geometry = geometry, colour = NA) +
   scale_fill_manual(breaks = c('0','1'),

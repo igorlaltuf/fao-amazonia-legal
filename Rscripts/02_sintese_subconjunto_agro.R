@@ -84,3 +84,47 @@ tabela.agro.valores[is.na(tabela.agro.valores)] <- 0 # transformar N.A em zero
 
 # exportar tabela com valores
 write.csv(tabela.agro.valores, file='Outputs/02_tabelas/02_subconjunto_agro_valores.csv', row.names = F)
+
+
+# tabela intermediadoras
+z <- tabela.agro.pontos %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras) %>% 
+  arrange(desc(total_agro))
+
+
+tabela.agro <- gt(z) %>%
+  cols_label(
+    muni = 'Município',
+    pont_emprego_agro = 'Empregos Formais',
+    pont_concentr_terra = 'Concentração de terra',
+    pont_graos_gado = 'Grãos e gado',
+    pont_itr = 'ITR',
+    pont_desmat = 'Desmatamento',
+    pont_infra_agro = 'Infraestrutura',
+    total_agro = 'Pontuação total'
+    
+  ) %>% 
+  tab_header(
+    title = 'Pontuação da agropecuária nas cidades intermediadoras da Amazônia Legal'
+  ) %>% 
+  cols_hide(
+    columns = c(cod_muni)
+  ) %>% 
+  fmt_markdown(
+    columns = c(muni)
+  ) %>% 
+  fmt_number(
+    columns = c(pont_emprego_agro, pont_concentr_terra, pont_graos_gado, pont_itr, pont_desmat, pont_infra_agro),
+    decimals = 0,
+    sep_mark = '.',
+    dec_mark = ','
+  ) %>% 
+  cols_align(
+    align = 'center'
+  )
+
+tabela.agro
+gtsave(tabela.agro, 'Outputs/03_mapas/Agropecuária/03_tabela_agro_inter.png')
+
+
+

@@ -49,3 +49,6 @@ write.csv(tabela.sintese.mineral, file='Outputs/02_tabelas/02_subconjunto_minera
 tabela.mineral.inter <- tabela.sintese.mineral %>% 
                         dplyr::filter(cod_muni %in% cidades.intermediadoras &
                                       total_mineral > 0)
+
+
+

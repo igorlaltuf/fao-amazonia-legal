@@ -48,11 +48,10 @@ ggplot(shape.estad.amzl) +
 
 x <- read_amazon()
 y <- read_state()
-amzl <- st_intersection(x,y)
-z <- st_intersection(amzl,viagens3)
+amzl <- st_intersection(x, y)
+z <- st_intersection(amzl, viagens3)
 
 plot(z) # shape de rotas na amzl continuar daqui!!!!
-
 
 
 

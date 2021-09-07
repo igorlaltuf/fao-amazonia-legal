@@ -16,7 +16,6 @@ cnae.cidades <- read_csv('Outputs/00_shapes_e_dados/00_rais_ativos_2019.csv',
 which(is.na(cnae.cidades$vinculos_ativos)) # retorna a linha dos NAs caso existam
 cnae.cidades$id_municipio <- as.numeric(cnae.cidades$id_municipio)
 
-
 # CNAE: 17 FABRICAÇÃO DE CELULOSE, PAPEL E PRODUTOS DE PAPEL
 cnae.celulose <- cnae.cidades %>% 
   select(id_municipio,cnae_2,vinculos_ativos) %>% 
