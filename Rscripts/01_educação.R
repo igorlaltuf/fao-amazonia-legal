@@ -67,3 +67,50 @@ tabela <- left_join(tabela.educacao, populacao, by=c('cod_muni','ano')) %>%
 
 # Salvar dados
 write.csv(tabela,'Outputs/01_tabelas/01_escolas_publicas_AMZL_2009_2020.csv', row.names = F)
+
+
+# dados amzl
+tabela.amzl <- tabela %>% 
+  ungroup() %>% 
+  select(1,5,6,7) %>%
+  group_by(ano) %>% 
+  summarise(pop = sum(populacao),
+            matr = sum(qtd_matriculas),
+            esc = sum(qtd_escolas)) %>% 
+  mutate(ano = as.numeric(ano))
+
+ggplot(tabela.amzl, aes(x = ano, y = matr)) +
+  geom_line(color = 'blue', group = 1) +
+  scale_y_continuous(name = 'Quantidade de Matrículas \n em escolas públicas', n.breaks = 6) +
+  scale_x_continuous(name = 'Ano', n.breaks = 7) +
+  theme_classic() 
+
+
+ggplot(tabela.amzl, aes(x = ano, y = esc)) +
+  geom_line(color = 'blue', group = 1) +
+  scale_y_continuous(name = 'Quantidade de escolas públicas', n.breaks = 6) +
+  scale_x_continuous(name = 'Ano', n.breaks = 7) +
+  theme_classic() 
+
+ggplot(tabela.amzl, aes(x = ano, y = pop)) +
+  geom_line(color = 'blue', group = 1) +
+  scale_y_continuous(name = 'População estimada da Amazônia Legal', n.breaks = 6) +
+  scale_x_continuous(name = 'Ano', n.breaks = 7) +
+  theme_classic() 
+
+x <- (tabela.amzl$esc/tabela.amzl$pop)*100000
+plot1 <- ggplot(tabela.amzl, aes(x = ano, y = x)) +
+  geom_line(color = 'blue', group = 1) +
+  scale_y_continuous(name = 'Escolas públicas a cada 100 mil habitantes\nna Amazônia Legal', n.breaks = 6) +
+  scale_x_continuous(name = 'Ano', n.breaks = 7) +
+  theme_classic() 
+
+y <- (tabela.amzl$matr/tabela.amzl$pop)*100000
+plot2 <- ggplot(tabela.amzl, aes(x = ano, y = y)) +
+  geom_line(color = 'blue', group = 1) +
+  scale_y_continuous(name = 'Matrículas em escolas públicas\na cada 100 mil habitantes\nna Amazônia Legal', n.breaks = 6) +
+  scale_x_continuous(name = 'Ano', n.breaks = 7) +
+  theme_classic() 
+
+plot1|plot2
+ggsave('Outputs/03_mapas/Educação/dados_amzl.png')

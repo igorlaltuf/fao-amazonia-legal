@@ -20,5 +20,6 @@ library(ggspatial) # elementos para os mapas
 library(patchwork) # juntar gráficos na mesma figura
 library(gt) # fazer tabelas
 library(microdatasus) # carrega dados do datasus
+library(cepR) # transforma CEP em coordenadas
 
 # removi o pacote plyr porque estava dando conflito com as funções do dplyr que eu já havia utilizado

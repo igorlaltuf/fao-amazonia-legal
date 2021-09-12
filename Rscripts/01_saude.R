@@ -5,6 +5,7 @@ source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
+
 # 1 - CNES-ST - Dados dos estabelecimentos
 # estabelecimentos de saúde 
 
@@ -28,11 +29,12 @@ setwd('F:/Meu repositório/fao-amazonia-legal/')
 # GESPRG6E  Alta complexidade estadual = 1
 # GESPRG6M  Alta complexidade municipal = 1
 
-x <- read.csv('Outputs/00_shapes_e_dados/00_cnes_st_2019.csv')
+# Dados de dezembro de 2019
+x <- read_csv('Outputs/00_shapes_e_dados/00_cnes_st_2019.csv', col_types = c('c',rep('n',3),rep('c',3),rep('n',13)))
 shape.cnes <- st_read('Outputs/00_shapes_e_dados/shape.cnes.amzl.shp')
-x$CNES <- as.numeric(as.character(x$CNES))
+shape.cnes$cd_cnes <- as.character(shape.cnes$cd_cnes)
 
-pontos.cnes <- left_join(x, shape.cnes, by=c('CNES' = 'cd_cnes')) %>% 
+pontos.cnes <- left_join(x, shape.cnes, by=c('CNES' = 'cd_cnes')) %>%    
   dplyr::filter(VINC_SUS == 1)
 
 atend.hospitalar <- pontos.cnes %>% 
@@ -43,6 +45,29 @@ atend.ambulat <- pontos.cnes %>%
  
 atend.urgemerg <- pontos.cnes %>% 
   dplyr::filter(URGEMERG == 1) # Indica a existência de INSTALAÇÃO FÍSICA de URGÊNCIA/EMERGÊNCIA
+
+
+sum(is.na(pontos.cnes$cd_mn)) # 1110 estabelecimentos sem coordenadas 15617 estabelecimentos
+
+
+
+# cepR teste
+# x <- pontos.cnes %>% 
+#   dplyr::filter(is.na(cd_mn))
+# 
+# t <- cepR::busca_multi(token = 'colocartokenaqui', lista_ceps = x$COD_CEP)
+# write.csv2(t,'Outputs/03_mapas/cepR_pontos.csv')
+# 
+# # https://stackoverflow.com/questions/47955292/visualizing-two-or-more-data-points-where-they-overlap-ggplot-r
+# t <- t %>% 
+#   mutate(coord = st_point(c(latitude,longitude)))
+# 
+# teste <- t %>% 
+#   group_by(estado) %>% 
+#   count()
+# st_point(c(t$latitude,t$longitude))
+
+
 
 # mapa
 shape.muni.amzl <- st_read('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
@@ -57,9 +82,9 @@ shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 # CNES com vínculo com SUS
 a <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
-  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'CNES'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
-  scale_color_manual(values = c("CNES" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
+  geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'CNES'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
+  scale_color_manual(values = c("CNES" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -75,9 +100,9 @@ a <- ggplot() +
 
 b <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
-  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = atend.hospitalar, aes(geometry = geometry, col = 'Estabelecimento com atendimento hospitalar'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com atendimento hospitalar" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
+  geom_sf(data = atend.hospitalar, aes(geometry = geometry, col = 'Estabelecimento com\natendimento hospitalar'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
+  scale_color_manual(values = c("Estabelecimento com\natendimento hospitalar" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -93,14 +118,14 @@ b <- ggplot() +
 
 c <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
-  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = atend.ambulat, aes(geometry = geometry, col = 'Estabelecimento com atendimento ambulatorial'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com atendimento ambulatorial" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
+  geom_sf(data = atend.ambulat, aes(geometry = geometry, col = 'Estabelecimento com\natendimento ambulatorial'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
+  scale_color_manual(values = c("Estabelecimento com\natendimento ambulatorial" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos com atendimento ambulatorial \n vinculados ao SUS em 2019') +
+  ggtitle('Estabelecimentos com atendimento\nambulatorial vinculados ao SUS em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -111,14 +136,14 @@ c <- ggplot() +
 
 d <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
-  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = atend.urgemerg, aes(geometry = geometry, col = 'Estabelecimento com atendimento de urgência e emergência'), stat = "sf_coordinates", size = .2, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com atendimento de urgência e emergência" = "#99d8c9", "Hidrovias navegáveis" = "#2b8cbe"),
+  geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
+  geom_sf(data = atend.urgemerg, aes(geometry = geometry, col = 'Estabelecimento com atendimento\nde urgência e emergência'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
+  scale_color_manual(values = c("Estabelecimento com atendimento\nde urgência e emergência" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos com atendimento de urgência e emergência \n vinculados ao SUS em 2019') +
+  ggtitle('Estabelecimentos com atendimento de urgência\ne emergência vinculados ao SUS em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -130,8 +155,10 @@ d <- ggplot() +
 (a|b)/
 (c|d)
 
-ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_não_usar_1.png', scale = 2)
+ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_não_usar_1.png', scale = 1.8)
 # faltam pontos das geometrias dos hospitais. Não usar!
+
+
 
 
 # POR TIPO DE ATENDIMENTO
@@ -233,9 +260,6 @@ alta.complex <- left_join(alta.complex, populacao, by = c('CODUFMUN'='cod_muni')
 shape.muni.amzl$cd_mn <- as.numeric(str_sub(shape.muni.amzl$cd_mn, end = -2))
 alta.complex.shape <- left_join(shape.muni.amzl, alta.complex, by = c('cd_mn' = 'CODUFMUN')) 
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
-
-# fazer
-
 
 
 # Fazer tabelas das intermediárias com gt table
@@ -384,10 +408,15 @@ gtsave(tabela.datasus, 'Outputs/03_mapas/Saúde/03_tabela_alta_complex.png')
 # 2 - Fazer consulta para a base CNES-LT para ver a quantidade de leitos
 # explicação leitos (porque escolhi a variável QT_SUS, já que os dados incluem a rede privada):
 # https://wiki.saude.gov.br/cnes/index.php/Principais_Conceitos 
+# Dados de dezembro de 2019
 
 # AMZL
+x <- read.csv('Outputs/00_shapes_e_dados/00_cnes_lt_2019.csv')
+
+# Não houve diferenciação pelo tipo de leito (por isso cada estabelecimento tem mais de uma linha).
+# Foram contabilizados apenas os leitos do SUS.
 leitos <- read.csv('Outputs/00_shapes_e_dados/00_cnes_lt_2019.csv') %>%  
-  left_join(populacao, by = c('CODUFMUN'='cod_muni')) %>%
+  left_join(populacao, by = c('CODUFMUN'='cod_muni')) %>%  
   select(CODUFMUN, muni, QT_SUS, populacao) %>% 
   group_by(CODUFMUN, muni, populacao) %>% 
   summarise(qtd_leitos_sus = sum(QT_SUS)) %>% 
@@ -396,7 +425,7 @@ leitos <- read.csv('Outputs/00_shapes_e_dados/00_cnes_lt_2019.csv') %>%
   arrange(desc(qtd_leitos_sus_100_mil)) %>% 
   na.omit() # remove aqueles municípios não estão dentro da AMZL, apesar de parte do estado pertencer a AMZL
   
-# FAZER Mapa
+
 
 
 

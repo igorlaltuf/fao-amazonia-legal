@@ -13,7 +13,7 @@ portos <- st_read('./Input/shapes logística/portos/Portos.shp') %>%
           dplyr::filter(MUNICIPIO %in% muni.nome.amzl)
 portos$CODPORTUAR <- as.character(portos$CODPORTUAR)
 
-cod.portos.amzl <- st_set_geometry(portos['CODPORTUAR'],value = NULL)
+cod.portos.amzl <- st_set_geometry(portos['CODPORTUAR'], value = NULL)
 cod.portos.amzl <- cod.portos.amzl[['CODPORTUAR']]      
 cod.portos.amzl <- as.character(cod.portos.amzl)
 

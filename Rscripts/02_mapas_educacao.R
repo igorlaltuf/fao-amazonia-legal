@@ -213,15 +213,15 @@ tabela.educacao <- gt(tabela.2009.2019) %>%
   cols_label(
     uf_sigla = 'UF',
     muni = 'Município',
-    matr_100_mil_2009 = 'Matrículas a cada 100 mil \n habitantes em 2009',
-    matr_100_mil_2019 = 'Matrículas a cada 100 mil \n habitantes em 2019',
+    matr_100_mil_2009 = 'Matrículas em escolas públicas a cada 100 mil \n habitantes em 2009',
+    matr_100_mil_2019 = 'Matrículas em escolas públicas a cada 100 mil \n habitantes em 2019',
     var_matr = 'Variação - Matrículas',
-    escol_100_mil_2009 = 'Escolas a cada 100 mil \n habitantes em 2009',
-    escol_100_mil_2019 = 'Escolas a cada 100 mil \n habitantes em 2019',
+    escol_100_mil_2009 = 'Escolas públicas a cada 100 mil \n habitantes em 2009',
+    escol_100_mil_2019 = 'Escolas públicas a cada 100 mil \n habitantes em 2019',
     var_escol = 'Variação - Escolas'
   ) %>% 
   tab_header(
-    title = 'Quantidade de matrículas e escolas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
+    title = 'Quantidade de matrículas em escolas públicas e quantidade de escolas públicas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
     subtitle = '2009 e 2019'
   ) %>%
   fmt_markdown(
@@ -299,13 +299,13 @@ matr.2009.2019 <- left_join(matr.tab.2009, matr.tab.2019, by = c('cod_muni','mun
 tabela.educacao <- gt(matr.2009.2019) %>%
   cols_label(
     muni = 'Município',
-    matr_100_mil.x = 'Matrículas a cada 100 mil \n habitantes em 2009',
+    matr_100_mil.x = 'Matrículas em escolas públicas a cada 100 mil \n habitantes em 2009',
     class_matr_100_mil.x = 'Classificação das matrículas \n em 2009',
-    matr_100_mil.y = 'Matrículas a cada 100 mil \n habitantes em 2019',
+    matr_100_mil.y = 'Matrículas em escolas públicas a cada 100 mil \n habitantes em 2019',
     class_matr_100_mil.y = 'Classificação das matrículas \n em 2019'
   ) %>% 
   tab_header(
-    title = 'Quantidade de matrículas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
+    title = 'Quantidade de matrículas em escolas públicas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
     subtitle = '2009 e 2019'
   ) %>%
   cols_hide(
@@ -346,13 +346,13 @@ escol.2009.2019 <- left_join(escol.tab.2009, escol.tab.2019, by = c('cod_muni','
 tabela.educacao <- gt(escol.2009.2019) %>%
   cols_label(
     muni = 'Município',
-    escol_100_mil.x = 'Escolas a cada 100 mil \n habitantes em 2009',
-    class_escol_100_mil.x = 'Classificação das escolas \n em 2009',
-    escol_100_mil.y = 'Escolas a cada 100 mil \n habitantes em 2019',
-    class_escol_100_mil.y = 'Classificação das escolas \n em 2019'
+    escol_100_mil.x = 'Escolas públicas a cada 100 mil\nhabitantes em 2009',
+    class_escol_100_mil.x = 'Classificação das escolas\npúblicas  em 2009',
+    escol_100_mil.y = 'Escolas públicas a cada 100 mil\nhabitantes em 2019',
+    class_escol_100_mil.y = 'Classificação das escolas públicas\nem 2019'
   ) %>% 
   tab_header(
-    title = 'Quantidade de escolas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
+    title = 'Quantidade de escolas públicas a cada 100 mil habitantes \n nas cidades intermediadoras da Amazônia Legal',
     subtitle = '2009 e 2019'
   ) %>%
   cols_hide(
@@ -404,9 +404,10 @@ ggplot() +
                          style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
   theme(legend.position = 'bottom',
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5),
+        legend.text = element_text(size = 14))
 
-ggsave('Outputs/03_mapas/Educação/03_mapa_campi_IES.png', scale = 2)  
+ggsave('Outputs/03_mapas/Educação/03_mapa_campi_IES.png', width = 10, height = 8, dpi = 300, units = "in", device='png')  
 
 
 

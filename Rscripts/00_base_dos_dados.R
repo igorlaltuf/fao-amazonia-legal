@@ -62,13 +62,13 @@ write.csv(df,'Outputs/00_shapes_e_dados/00_rais_vinculos_2019.csv', row.names = 
 # algumas colunas só aparecem quando eu faço a requisição especificamente pelo seu nome (NIVATE_H e URGEMERG).
 # Por isso eu selecionei as colunas que preciso.
 
-var.cnes.st <- c('CNES','CODUFMUN','VINC_SUS','TPGESTAO','TP_UNID','TURNO_AT','GESPRG1E', 
+var.cnes.st <- c('CNES','CODUFMUN','COD_CEP','VINC_SUS','TPGESTAO','TP_UNID','TURNO_AT','GESPRG1E', 
                  'GESPRG1M','GESPRG2E','GESPRG2M','GESPRG4E','GESPRG4M','GESPRG5E','GESPRG5M', 
                  'GESPRG6E','GESPRG6M','NIVATE_A','NIVATE_H','URGEMERG')
 
 x <- fetch_datasus(year_start = 2019,
                    year_end = 2019, 
-                   month_start = 1, 
+                   month_start = 12, 
                    month_end = 12, 
                    uf = uf.amz.legal, 
                    information_system = "CNES-ST", 
@@ -81,10 +81,11 @@ var.cnes.lt <- c('CNES','CODUFMUN','TP_UNID','TP_LEITO','CODLEITO','QT_EXIST','Q
 
 y <- fetch_datasus(year_start = 2019,
                    year_end = 2019, 
-                   month_start = 1, 
+                   month_start = 12, 
                    month_end = 12, 
                    uf = uf.amz.legal, 
                    information_system = "CNES-LT",
                    var = var.cnes.lt)
 
 write.csv(y,'Outputs/00_shapes_e_dados/00_cnes_lt_2019.csv', row.names = F)
+
