@@ -125,6 +125,3 @@ tabela.agro <- gt(z) %>%
 
 tabela.agro
 gtsave(tabela.agro, 'Outputs/03_mapas/Agropecuária/03_tabela_agro_inter.png')
-
-
-

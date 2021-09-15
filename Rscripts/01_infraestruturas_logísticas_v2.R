@@ -10,12 +10,12 @@ setwd('F:/Meu repositório/fao-amazonia-legal/')
 muni.nome.amzl <- cidades.amazonia.legal.nome[2]
 muni.nome.amzl <- stri_sub(muni.nome.amzl$muni,1,-6)
 portos <- st_read('./Input/shapes logística/portos/Portos.shp') %>% 
-          dplyr::filter(MUNICIPIO %in% muni.nome.amzl)
-portos$CODPORTUAR <- as.character(portos$CODPORTUAR)
-
+  dplyr::filter(MUNICIPIO %in% muni.nome.amzl &
+                SITUACAOPO == "Operando") %>% 
+  mutate(CODPORTUAR = as.character(CODPORTUAR)) 
+  
 cod.portos.amzl <- st_set_geometry(portos['CODPORTUAR'], value = NULL)
 cod.portos.amzl <- cod.portos.amzl[['CODPORTUAR']]      
-cod.portos.amzl <- as.character(cod.portos.amzl)
 
 # Fonte dos shapes: https://www.gov.br/infraestrutura/pt-br/assuntos/dados-de-transportes/bit/bitmodosmapas
 # Classificação NCM https://www.gov.br/produtividade-e-comercio-exterior/pt-br/assuntos/comercio-exterior/estatisticas/base-de-dados-bruta#Tabelas_Correlacoes
@@ -24,7 +24,7 @@ cod.portos.amzl <- as.character(cod.portos.amzl)
 mercadoria <- read.delim(file = 'Input/ANTAQ dados/Mercadoria.txt', sep = ';', dec = ',', fileEncoding = 'UTF-8-BOM') 
 mercadoria.conteiner <- read.delim(file = 'Input/ANTAQ dados/MercadoriaConteinerizada.txt', sep = ';', dec = ',', fileEncoding = 'UTF-8-BOM') 
 carga.cont <- read.delim(file = 'Input/ANTAQ dados/2019Carga_Conteinerizada.txt', sep = ';', dec = ',', fileEncoding = 'UTF-8-BOM') 
-antaq <- read_csv2("Input/ANTAQ dados/2019Carga.txt") 
+antaq <- read_csv2(file = "Input/ANTAQ dados/2019Carga.txt") 
 
 # Função que mostra o que é embarcado ou desembarcado em cada porto da AMZL
 # Esta função retorna a quantidade em toneladas e o percetual sobre o total do porto.
@@ -36,8 +36,8 @@ antaq <- antaq %>%
          dplyr::filter(Origem %in% porto.origem & # Porto de Origem
                        Sentido %in% sentido) # Produção que sai do porto 'Embarcados' ou 'Desembarcados'
 
-antaq <- left_join(antaq,mercadoria)
-antaq <- left_join(antaq,carga.cont)
+antaq <- left_join(antaq, mercadoria)
+antaq <- left_join(antaq, carga.cont)
 antaq <- left_join(antaq, mercadoria.conteiner)
 
 antaq$VLPesoCargaConteinerizada <- as.numeric(sub(",", ".", antaq$VLPesoCargaConteinerizada, fixed = TRUE))
@@ -77,9 +77,9 @@ total.porto$percentual <- round(total.porto$percentual, digits=2)
 return(total.porto) 
 }
 
-# Teste
-# mercadoria.portos('BRAM004','Embarcados')
 
+# Teste
+x <- mercadoria.portos('BRMCP','Embarcados')
 
 # Verificar todas as mercadorias embarcadas nos os portos da AMZL 
 total.embarcado <- mercadoria.portos(cod.portos.amzl,'Embarcados') # aqui o % sobre o total não vai funcionar
@@ -107,6 +107,7 @@ tabela.portos <- cidades.amazonia.legal.nome
 tabela.portos$muni <- substr(tabela.portos$muni,1,nchar(tabela.portos$muni)-5)
 tabela.portos <- left_join(portos,tabela.portos,by=c('MUNICIPIO'='muni'))
 
+
 # Pontuação pela empresa proprietária do porto
 # Mineração
 minera <- str_extract(tabela.portos$COMPANHIA, regex("mineração|cadam|caulim|rio doce|alumar|alcoa", ignore_case = TRUE))
@@ -117,9 +118,9 @@ petr.e.gas <- str_extract(tabela.portos$COMPANHIA, regex("petróleo|petro|fogás",
 
 tabela.portos <- tabela.portos %>% 
                  select('cod_muni','MUNICIPIO','CODPORTUAR','NOMEPORTO','COMPANHIA') %>% 
-                 mutate(porto_petroleo_e_gas = ifelse(str_detect(tabela.portos$COMPANHIA,petr.e.gas)==T,1,0)) %>% 
-                 mutate(porto_agropecuaria = ifelse(str_detect(tabela.portos$COMPANHIA,agro)==T,1,0)) %>% 
-                 mutate(porto_mineracao = ifelse(str_detect(tabela.portos$COMPANHIA,minera)==T,1,0)) 
+                 mutate(porto_petroleo_e_gas = ifelse(str_detect(tabela.portos$COMPANHIA, petr.e.gas)==T,1,0)) %>% 
+                 mutate(porto_agropecuaria = ifelse(str_detect(tabela.portos$COMPANHIA, agro)==T,1,0)) %>% 
+                 mutate(porto_mineracao = ifelse(str_detect(tabela.portos$COMPANHIA, minera)==T,1,0)) 
 
 # Pontuação pelas mercadorias embarcadas no porto 
 # agropecuária
@@ -171,6 +172,10 @@ tabela.portos <- tabela.portos %>%
             porto_petr_e_gás = ifelse(sum(porto_petroleo_e_gas) > 0,1,0),
             porto_mineracao = ifelse(sum(porto_mineracao) > 0,1,0))
 
+
+tabela.portos <- tabela.portos %>% as.data.frame()
+cidades.amazonia.legal <- cidades.amazonia.legal %>% as.data.frame()
+x <- left_join(tabela.portos, cidades.amazonia.legal.nome, by = "cod_muni")
 
 # 2 - Verificar dados dos armazens existentes na AMZL em 2020
 armazens <- read_excel(path = './Input/armazens.xlsx') 

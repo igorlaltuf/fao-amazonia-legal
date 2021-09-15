@@ -51,7 +51,7 @@ ggplot(mineracao)+
         legend.title = element_text(size = 9))
 
 # salvar mapa
-ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png', scale = 1.1)
+ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png')
 
 # 2 - Mapas dos indicadores separados
 x <- c('emprego_mineracao','royalties_cfem','mineracao_bndes',
@@ -118,3 +118,5 @@ ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_5.png', scale = 1.3)
 
 mapa.6
 ggsave('Outputs/03_mapas/Mineração/indicadores_mineral_6.png', scale = 1.3)
+
+x <- read.csv('Outputs/02_tabelas/02_subconjunto_mineral.csv')
