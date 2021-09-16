@@ -29,9 +29,11 @@ intermediadoras <- c('CRUZEIRO DO SUL\\(AC\\)|RIO BRANCO\\(AC\\)|ITACOATIARA\\(A
                     PORTO VELHO\\(RO\\)|BOA VISTA\\(RR\\)|RORAINOPOLIS\\(RR\\)|ARAGUAINA\\(TO\\)|GURUPI\\(TO\\)|PALMAS\\(TO\\)')
 
 sf_use_s2(FALSE)
-shape.itinerario.2019 <- st_intersection(shape.amzl, shape.itinerario.2019)
-shape.itinerario.2021 <- st_intersection(shape.amzl, shape.itinerario.2021)
+shape.itinerario.2019 <- st_intersection(shape.amzl, shape.itinerario.2019) %>% na.omit()
+shape.itinerario.2021 <- st_intersection(shape.amzl, shape.itinerario.2021) %>% na.omit()
 
+# 276 itinerários nas cidades intermediadoras (filtrar até a segunda linha abaixo)
+# os valores absolutos são referentes às viagens de vda e volta por ano (99 linhas registraram queda no número de viagens e 40 foram extintas)
 # 2019
 intermed <- shape.itinerario.2019 %>%
   dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
@@ -39,11 +41,15 @@ intermed <- shape.itinerario.2019 %>%
          cat_covid = cut(var_covid, breaks = c(-Inf, -0.6, -0.3, 0), labels = c('-100% até -60%','-60% até -30%','-30% até 0%'))) %>% 
   dplyr::filter(var_covid < 0)  # filtrar as linhas em que houve queda de saídas
 
+extintas <- intermed %>% 
+  dplyr::filter(dados_2021 == 0)
+
+
 # queda de saídas em % de 2019 a 2021
-cidades.ponto <- st_read("Input/REGIC2018_cidades_ponto/REGIC2018_Cidades_ponto.shp", options = "ENCODING=UTF-8") %>% 
+cidades.ponto <- st_read("Input/REGIC2018_cidades_ponto/REGIC2018_Cidades_ponto.shp", options = "ENCODING = UTF-8") %>% 
   dplyr::filter(cod_cidade %in% cidades.intermediadoras)
 
-
+# itinerários que registraram queda
 grafico <- ggplot() + 
   geom_sf(data = estad.amzl, aes(geometry = geometry)) +
   geom_sf(data = intermed, aes(geometry = geom, color = cat_covid), size = .6, show.legend = 'line') +
@@ -62,25 +68,102 @@ grafico <- ggplot() +
 grafico +
   geom_sf_text(data = cidades.ponto, aes(label = label), colour='grey10', vjust = 1.3, size = 2.2) 
 
-
-ggsave('Outputs/03_mapas/Outros/frequencia_rodo_covid.png')
-
+ggsave('Outputs/03_mapas/Outros/rodo_queda_covid.png')
 
 
+# itinerários que não registraram queda (125 no total)
+intermed <- shape.itinerario.2019 %>%
+  dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
+  mutate(var_covid = (dados_2021/dados_2019)-1) %>% 
+  dplyr::filter(var_covid == 0)
 
+grafico <- ggplot() + 
+  geom_sf(data = estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = intermed, aes(geometry = geom), size = .6, show.legend = 'line') +
+  geom_sf(data = cidades.ponto, aes(geometry = geometry), size = 1, shape = 16) +
+  coord_sf(crs = 4674) +
+  annotation_scale(location='br') +
+  annotation_north_arrow(location='tl',
+                         style = north_arrow_fancy_orienteering()) +
+  theme_classic() +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = 'bottom')
+
+grafico +
+  geom_sf_text(data = cidades.ponto, aes(label = label), colour='grey10', vjust = 1.3, size = 2.2) 
+
+ggsave('Outputs/03_mapas/Outros/rodo_estavel_covid.png')
+
+# itinerários que aumentaram (11 no total)
+# 2019
+intermed <- shape.itinerario.2019 %>%
+  dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
+  mutate(var_covid = (dados_2021/dados_2019)-1,
+         cat_covid = cut(var_covid, breaks = c(0, 0.3, 0.6, Inf), labels = c('0% até 30%', '30% até 60%','60% até 100%'))) %>% 
+  dplyr::filter(var_covid > 0)  # filtrar as linhas em que houve queda de saídas
+
+grafico <- ggplot() + 
+  geom_sf(data = estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = intermed, aes(geometry = geom, color = cat_covid), size = .6, show.legend = 'line') +
+  geom_sf(data = cidades.ponto, aes(geometry = geometry), size = 1, shape = 16) +
+  scale_color_manual(values = c('0% até 30%' = 'red', '30% até 60%' = 'orange', '60% até 100%' = 'green'), name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("solid", "solid", "solid")))) +
+  coord_sf(crs = 4674) +
+  annotation_scale(location='br') +
+  annotation_north_arrow(location='tl',
+                         style = north_arrow_fancy_orienteering()) +
+  theme_classic() +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = 'bottom')
+
+grafico +
+  geom_sf_text(data = cidades.ponto, aes(label = label), colour='grey10', vjust = 1.3, size = 2.2) 
+
+ggsave('Outputs/03_mapas/Outros/rodo_aument_covid.png')
+
+
+# novas linhas (não foram criadas novos itinerários)
+intermed <- shape.itinerario.2021 %>%
+  dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
+  dplyr::filter(dados_2019 == 0 & dados_2021 > 0)
+
+grafico <- ggplot() + 
+  geom_sf(data = estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = intermed, aes(geometry = geom), size = .6, show.legend = 'line') +
+  geom_sf(data = cidades.ponto, aes(geometry = geometry), size = 1, shape = 16) +
+  coord_sf(crs = 4674) +
+  annotation_scale(location='br') +
+  annotation_north_arrow(location='tl',
+                         style = north_arrow_fancy_orienteering()) +
+  theme_classic() +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = 'bottom')
+
+grafico +
+  geom_sf_text(data = cidades.ponto, aes(label = label), colour='grey10', vjust = 1.3, size = 2.2) 
+
+ggsave('Outputs/03_mapas/Outros/rodo_novas_covid.png')
+
+
+queda.n.viagens <- (sum(shape.itinerario.2019$dados_2019)/sum(shape.itinerario.2021$dados_2021))-1
+
+
+
+
+
+
+# 363 viagens em uma direção ou 726 ida e volta = 1 viagem pro dia (aparentemente eles consideram o ano com 363 dias)
 # linhas diárias 2019
 intermed1 <- intermed %>% 
-  dplyr::filter(dados_2019 >= 363)
+  dplyr::filter(dados_2019 >= 726)
 
 # linhas diárias 2021
 intermed <- shape.itinerario.2021 %>%
   dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
-  dplyr::filter(dados_2021 >= 363)
+  dplyr::filter(dados_2021 >= 726)
 
 
   
-
-
 
 
 
