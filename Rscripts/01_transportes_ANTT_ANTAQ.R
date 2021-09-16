@@ -122,15 +122,18 @@ grafico +
 ggsave('Outputs/03_mapas/Outros/rodo_aument_covid.png')
 
 
-# novas linhas (não foram criadas novos itinerários)
+# novos itinerários
 intermed <- shape.itinerario.2021 %>%
   dplyr::filter(str_detect(descricao, intermediadoras)) %>% 
-  dplyr::filter(dados_2019 == 0 & dados_2021 > 0)
+  dplyr::filter(dados_2019 == 0 & dados_2021 > 0) %>% 
+  mutate(cat_dados_2021 = cut(dados_2021, breaks = c(0, 1000, 2000, Inf), labels = c('até 1 mil', '1 mil - 2 mil','acima de 2 mil'))) 
 
 grafico <- ggplot() + 
   geom_sf(data = estad.amzl, aes(geometry = geometry)) +
-  geom_sf(data = intermed, aes(geometry = geom), size = .6, show.legend = 'line') +
+  geom_sf(data = intermed, aes(geometry = geom, color = cat_dados_2021), size = .6, show.legend = 'line') +
   geom_sf(data = cidades.ponto, aes(geometry = geometry), size = 1, shape = 16) +
+  scale_color_manual(values = c('até 1 mil' = 'red', '1 mil - 2 mil' = 'orange', 'acima de 2 mil' = 'green'), name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("solid", "solid", "solid")))) +
   coord_sf(crs = 4674) +
   annotation_scale(location='br') +
   annotation_north_arrow(location='tl',
@@ -145,9 +148,15 @@ grafico +
 ggsave('Outputs/03_mapas/Outros/rodo_novas_covid.png')
 
 
-queda.n.viagens <- (sum(shape.itinerario.2019$dados_2019)/sum(shape.itinerario.2021$dados_2021))-1
+queda.viagens.nac <- (sum(shape.itinerario.2019$dados_2019)/sum(shape.itinerario.2021$dados_2021))-1 # 13,07% no Brasil
 
 
+x <- shape.itinerario.2019 %>% 
+  dplyr::filter(str_detect(descricao, intermediadoras))
+y <- shape.itinerario.2021 %>% 
+  dplyr::filter(str_detect(descricao, intermediadoras))
+
+queda.intermed <- (sum(x$dados_2019)/sum(y$dados_2021))-1 # 20,4% de queda nas intermediadoras
 
 
 
