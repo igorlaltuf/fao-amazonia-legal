@@ -19,7 +19,7 @@ cnae.cidades <- read_csv('Outputs/00_shapes_e_dados/00_rais_ativos_2019.csv',
 which(is.na(cnae.cidades$vinculos_ativos)) # retorna a linha dos NAs caso existam
 cnae.cidades$id_municipio <- as.numeric(cnae.cidades$id_municipio)
 
-# 35115 Geração de energia elétrica
+# 35115 Geração de energia elétrica (acima de 200 vinculos ativos)
 cnae.energia <- cnae.cidades %>% 
                 select(id_municipio,cnae_2,vinculos_ativos) %>% 
                 filter(str_detect(cnae_2, "^35115")) %>%  # filtrar empregos relacionados à Geração de energia elétrica
@@ -39,10 +39,10 @@ cnae.energia <- classificar.variavel(cnae.energia,'empregos_energia','class_empr
 cnae.energia.inter <- cnae.energia %>%
                 dplyr::filter(cod_muni %in% cidades.intermediadoras)
 
-x <- cnae.energia %>% 
-  group_by(class_empregos_energia) %>%
-  mutate(N_category = n()) %>%
-  count(N_category)
+# x <- cnae.energia %>% 
+#   group_by(class_empregos_energia) %>%
+#   mutate(N_category = n()) %>%
+#   count(N_category)
 
 
 # 2 - MINERAÇÃO - Vínculos ativos em 31-12-2019 por município e relacionados à mineração
@@ -116,9 +116,6 @@ empregos.rais <- full_join(cnae.energia,cnae.mineracao)
 empregos.rais <- full_join(empregos.rais,cnae.agro)
 empregos.rais <- full_join(empregos.rais,cidades.amazonia.legal.nome)
 
-colnames(empregos.rais)[3] <- 'qtd_empregos_energia'
-colnames(empregos.rais)[5] <- 'qtd_empregos_mineracao'
-colnames(empregos.rais)[7] <- 'qtd_empregos_agro'
 
 # Salvar csv com dados da RAIS para os setores analisados e suas respectivas classificações
 write.csv(empregos.rais,file='Outputs/01_tabelas/01_empregos_rais.csv', row.names = F)

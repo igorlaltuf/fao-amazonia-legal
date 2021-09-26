@@ -81,7 +81,7 @@ shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 # dados de 2015 dos pontos
 # CNES com vínculo com SUS
 a <- ggplot() +
-  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'CNES'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
   scale_color_manual(values = c("CNES" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
@@ -99,7 +99,7 @@ a <- ggplot() +
         plot.title = element_text(hjust = 0.5))
 
 b <- ggplot() +
-  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.hospitalar, aes(geometry = geometry, col = 'Estabelecimento com\natendimento hospitalar'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
   scale_color_manual(values = c("Estabelecimento com\natendimento hospitalar" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
@@ -117,7 +117,7 @@ b <- ggplot() +
         plot.title = element_text(hjust = 0.5))
 
 c <- ggplot() +
-  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.ambulat, aes(geometry = geometry, col = 'Estabelecimento com\natendimento ambulatorial'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
   scale_color_manual(values = c("Estabelecimento com\natendimento ambulatorial" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
@@ -135,7 +135,7 @@ c <- ggplot() +
         plot.title = element_text(hjust = 0.5))
 
 d <- ggplot() +
-  geom_sf(data = shape.estad.amzl, aes(geometry = geometry)) +
+  geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.urgemerg, aes(geometry = geometry, col = 'Estabelecimento com atendimento\nde urgência e emergência'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
   scale_color_manual(values = c("Estabelecimento com atendimento\nde urgência e emergência" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),

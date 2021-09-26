@@ -20,8 +20,8 @@ shape.muni <- st_read('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
 
 
 mineracao <- left_join(mineracao,shape.muni, by = c('cod_muni'='cd_mn')) %>%   
-  select('cod_muni','muni','emprego_mineracao','royalties_cfem','mineracao_bndes','infra_mineral',
-         'desmatamento_minerac','minerac_ilegal','total_mineral','geometry')
+  select('cod_muni','muni','emprego_mineracao','pont_cfem','mineracao_bndes','infra_mineral',
+         'desmat_minerac','minerac_ilegal','total_mineral','geometry')
 
 # coordenadas das cidades intermediadoras
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
@@ -36,11 +36,12 @@ hidrovias <- st_intersection(hidrovias, shape.muni)
 ggplot(mineracao)+
   geom_sf(aes(fill = total_mineral, geometry = geometry), colour = NA) +
   scale_fill_gradientn(colors = brewer.pal(6,"OrRd")) +
-  geom_sf(data = ferrovias, aes(col = 'Ferrovias'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = hidrovias, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  scale_colour_discrete("") + # muda o título da legenda
-  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1) +
-  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
+  geom_sf(data = ferrovias, aes(col = 'Ferrovias'), size = 0.7, show.legend = 'line') +
+  geom_sf(data = hidrovias, aes(col = 'Hidrovias navegáveis'), size = 0.7, show.legend = 'line') +
+  scale_color_manual(values = c('Ferrovias' = '#636363', 'Hidrovias navegáveis' = '#43a2ca'), name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("solid", "solid")))) +
+  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .8) +
+  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10', vjust=1.25, size = 2.4) +
   labs(fill= 'Classificação de mineração na\nAmazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
@@ -51,7 +52,7 @@ ggplot(mineracao)+
         legend.title = element_text(size = 9))
 
 # salvar mapa
-ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png')
+ggsave('Outputs/03_mapas/Mineração/03_sintese_mineracao.png', scale = 1.4)
 
 # 2 - Mapas dos indicadores separados
 x <- c('emprego_mineracao','royalties_cfem','mineracao_bndes',

@@ -35,11 +35,12 @@ linhas.de.transmissao <- st_intersection(linhas.de.transmissao,shape.muni)
 ggplot(energia)+
   geom_sf(aes(fill = total_energia, geometry = geometry), colour = NA) +
   scale_fill_gradientn(colors = brewer.pal(6,"BuGn")) +
-  geom_sf(data = linhas.de.transmissao, aes(col = 'Linhas de Transmissão'), size = 0.5, show.legend = 'line') +
+  geom_sf(data = linhas.de.transmissao, aes(col = 'Linhas de Transmissão'), size = 0.7, show.legend = 'line') +
   stat_sf_coordinates(data = coord.cidades) +
-  scale_colour_discrete("") + # remove título da legenda
-  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates",size = 1) +
-  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.3, size = 2.7) +
+  scale_color_manual(values = c('Linhas de Transmissão' = '#f03b20'), name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("solid")))) +
+  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates",size = .6) +
+  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10',vjust=1.25, size = 2.2) +
   labs(fill = 'Classificação da geração de\nenergia elétrica na Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br') +
@@ -49,7 +50,7 @@ ggplot(energia)+
   theme(legend.position = 'bottom',
         legend.title = element_text(size = 9))
 
-ggsave('Outputs/03_mapas/Energia/03_sintese_energia.png', scale = 1.1)
+ggsave('Outputs/03_mapas/Energia/03_sintese_energia.png', scale = 1.4)
 
 # 2 - Mapas dos indicadores separados
 x <- c('pont_empregos_energia','pont_royalties_energia_cfh','pont_financ_bndes',

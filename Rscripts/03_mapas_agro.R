@@ -31,13 +31,14 @@ hidrovias <- st_intersection(hidrovias, shape.muni)
 # 1 - Mapa do somatório dos indicadores
 ggplot(agro)+
   geom_sf(aes(fill = total_agro, geometry = geometry), colour = NA)+
-  scale_fill_gradientn(colors = brewer.pal(6,"BuPu"))+
-  geom_sf(data = ferrovias, aes(col = 'Ferrovias'), size = 0.5, show.legend = 'line') +
-  geom_sf(data = hidrovias, aes(col = 'Hidrovias navegáveis'), size = 0.5, show.legend = 'line') +
-  scale_colour_discrete("") + # muda o título da legenda (remove o color)
+  scale_fill_gradientn(colors = brewer.pal(6,"YlOrBr"))+
+  geom_sf(data = ferrovias, aes(col = 'Ferrovias'), size = 0.7, show.legend = 'line') +
+  geom_sf(data = hidrovias, aes(col = 'Hidrovias navegáveis'), size = 0.7, show.legend = 'line') +
+  scale_color_manual(values = c('Ferrovias' = '#636363', 'Hidrovias navegáveis' = '#43a2ca'), name = NULL,
+                     guide = guide_legend(override.aes = list(linetype=c("solid", "solid")))) +
   stat_sf_coordinates(data = coord.cidades) +
-  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = 1)+
-  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10', vjust = 1.3, size = 2.9) +
+  geom_point(data = coord.cidades, aes(geometry = geometry), stat = "sf_coordinates", size = .8)+
+  geom_sf_text(data = coord.cidades, aes(label = mn), colour='grey10', vjust = 1.25, size = 2.6) +
   labs(fill = 'Classificação da agropecuária\nna Amazônia Legal', x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
@@ -47,11 +48,11 @@ ggplot(agro)+
   theme(legend.position = 'bottom',
         legend.title = element_text(size = 9))
 
-ggsave('Outputs/03_mapas/Agropecuária/03_sintese_agro.png', scale = 1.1)
+ggsave('Outputs/03_mapas/Agropecuária/03_sintese_agro.png', scale = 1.4)
 
 
 
-# 2 - Mapas dos indicadores separados
+# 2 - Mapas dos indicadores separados (não foram usados no relatório final)
 x <- c('pont_emprego_agro','pont_concentr_terra','pont_graos_gado',
        'pont_itr','pont_desmat','pont_infra_agro')
 

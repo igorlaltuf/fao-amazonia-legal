@@ -18,28 +18,32 @@ infraestrutura <- read.csv(file = 'Outputs/01_tabelas/01_infra_logistica.csv')
 # Empregos formais
 emprego.rais <- emprego.rais %>%   
                 select('cod_muni','muni','qtd_empregos_agro','class_empregos_agro') %>% 
-                mutate(pont_emprego_agro = ifelse(emprego.rais$class_empregos_agro %in% c('Alto','Muito Alto'), 1, 0))
+                mutate(pont_emprego_agro = ifelse(emprego.rais$class_empregos_agro %in% c('Alto','Muito Alto'), 1, 0)) %>% 
+                arrange(desc(qtd_empregos_agro))
 
 # Quantidade de médios e grandes estabelecimentos agropecuários
 estabelecimentos <- estabelecimentos %>% 
                     select('cod_muni','muni','medios_e_grandes_estab','class_medios_e_grandes_estab') %>% 
-                    mutate(pont_concentr_terra = ifelse(estabelecimentos$class_medios_e_grandes_estab %in% c('Alto','Muito Alto'), 1, 0))
+                    mutate(pont_concentr_terra = ifelse(estabelecimentos$class_medios_e_grandes_estab %in% c('Alto','Muito Alto'), 1, 0)) %>% 
+                    arrange(desc(medios_e_grandes_estab))
 
 # Produção de Soja, milho e Arroz por médios e grandes produtores soja ou quantidade de cabeças de gado
 gado <- gado %>% 
-  mutate(pont_gado = ifelse(gado$class_gado_2019 %in% c('Alto','Muito Alto'), 1, 0))
+  mutate(pont_gado = ifelse(gado$class_gado_2019 %in% c('Alto','Muito Alto'), 1, 0)) %>% 
+  arrange(desc(qtd_cabecas_de_gado_2019))
 
 prod.agro <- prod.agro %>% 
              select('cod_muni','muni','valor_producao','class_valor_producao')%>% 
-             mutate(pont_prod_agro = ifelse(prod.agro$class_valor_producao %in% c('Alto','Muito Alto'), 1, 0))
+             mutate(pont_prod_agro = ifelse(prod.agro$class_valor_producao %in% c('Alto','Muito Alto'), 1, 0)) %>% 
+             arrange(desc(valor_producao))
 
 graos_gado <- left_join(gado,prod.agro,by=c('cod_muni','muni')) %>% 
               mutate(pont_graos_gado = ifelse(pont_gado|pont_prod_agro == 1, 1, 0))
 
 # ITR Cota Parte
 itr.cota.parte <- itr.cota.parte %>% 
-                  select('cod_muni','cota_parte_itr','class_cota_parte_itr') %>% 
-                  mutate(pont_itr = ifelse(itr.cota.parte$class_cota_parte_itr %in% c('Alto','Muito Alto'), 1, 0))
+                  select('cod_muni','cota_parte_itr') %>% 
+                  mutate(pont_itr = 1)
 
 # Desmatamento INPE
 desmatamento <- desmatamento %>% 
@@ -65,7 +69,8 @@ tabela.agro.pontos <- tabela.sintese.agro %>%
 tabela.agro.pontos[is.na(tabela.agro.pontos)] <- 0 # transformar N.A em zero
 
 tabela.agro.pontos <- tabela.agro.pontos %>% 
-                      mutate(total_agro = pont_emprego_agro + pont_concentr_terra + pont_graos_gado + pont_itr + pont_desmat + pont_infra_agro)
+                      mutate(total_agro = pont_emprego_agro + pont_concentr_terra + pont_graos_gado + pont_itr + pont_desmat + pont_infra_agro) %>% 
+                      arrange(desc(total_agro))
 
 # Exportar tabela de pontos
 write.csv(tabela.agro.pontos, file='Outputs/02_tabelas/02_subconjunto_agro_pontos.csv', row.names = F)
@@ -86,9 +91,10 @@ tabela.agro.valores[is.na(tabela.agro.valores)] <- 0 # transformar N.A em zero
 write.csv(tabela.agro.valores, file='Outputs/02_tabelas/02_subconjunto_agro_valores.csv', row.names = F)
 
 
-# tabela intermediadoras
+# tabela intermediadoras que tiveram pelo menos 1 ponto
 z <- tabela.agro.pontos %>% 
-  dplyr::filter(cod_muni %in% cidades.intermediadoras) %>% 
+  dplyr::filter(cod_muni %in% cidades.intermediadoras,
+                total_agro > 0) %>% 
   arrange(desc(total_agro))
 
 
@@ -114,7 +120,7 @@ tabela.agro <- gt(z) %>%
     columns = c(muni)
   ) %>% 
   fmt_number(
-    columns = c(pont_emprego_agro, pont_concentr_terra, pont_graos_gado, pont_itr, pont_desmat, pont_infra_agro),
+    columns = c(pont_emprego_agro, pont_concentr_terra, pont_graos_gado, pont_itr, pont_desmat),
     decimals = 0,
     sep_mark = '.',
     dec_mark = ','

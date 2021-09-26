@@ -178,11 +178,12 @@ cidades.amazonia.legal <- cidades.amazonia.legal %>% as.data.frame()
 x <- left_join(tabela.portos, cidades.amazonia.legal.nome, by = "cod_muni")
 
 # 2 - Verificar dados dos armazens existentes na AMZL em 2020
+cidades.amzl.vec <- as.vector(cidades.amazonia.legal$.)
 armazens <- read_excel(path = './Input/armazens.xlsx') 
 armazens <- armazens %>% 
-  mutate(existe_armazem = ifelse(armazens$armazens_e_silos_2_sem_2020 >0,1,0)) %>% 
+  mutate(existe_armazem = ifelse(armazens$armazens_e_silos_2_sem_2020 >0,1,0)) %>%   
   select(1,4) %>% 
-  dplyr::filter(cod_muni %in% cidades.amazonia.legal)
+  dplyr::filter(cod_muni %in% cidades.amzl.vec)
 
 
 # 3 - Ferrovias na AMZL

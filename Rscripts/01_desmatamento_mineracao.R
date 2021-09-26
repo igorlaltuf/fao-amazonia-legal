@@ -1,4 +1,5 @@
 ### Uso da terra voltado para mineração para os anos de 2004,2008,2010,2012 e 2014
+# municípios com pelo menos 30 km² desmatados no período em função da mineração
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')
@@ -99,6 +100,8 @@ desmatamento.mineracao <- desmatamento.mineracao %>% select(3,1,2)
 desmatamento.mineracao <- classificar.variavel(desmatamento.mineracao,'total','class_desmatamento_minerac')
 
 desmatamento.mineracao <- left_join(desmatamento.mineracao,cidades.amazonia.legal.nome,by='cod_muni') %>%  # colocar nomes corretos dos municípios
-  select(1,5,3,4)              
+  select(1,5,3) 
+
+desmatamento.mineracao  <- classificar.variavel(desmatamento.mineracao, 'total','class_desmat_min')
 
 write.csv(desmatamento.mineracao,'Outputs/01_tabelas/01_desmatamento_mineracao.csv', row.names = F)
