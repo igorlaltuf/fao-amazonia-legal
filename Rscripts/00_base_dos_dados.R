@@ -15,7 +15,7 @@ query <- "SELECT ano, sigla_uf, id_municipio, empresa, sinal, produto, SUM(acess
           WHERE ano = 2019
           GROUP BY ano, sigla_uf, id_municipio, empresa, sinal, produto"
 internet <- read_sql(query)
-write.csv(internet, 'Outputs/00_shapes_e_dados/00_internet_anatel.csv',row.names = F)
+write.csv(internet, 'Outputs/00_shapes_e_dados/00_internet_anatel.csv', row.names = F)
 
 # DATASUS - SIM Municipal
 query <- "SELECT * FROM `basedosdados.br_ms_sim.municipio_causa`" # baixas todos os dados de mortalidade do datasus

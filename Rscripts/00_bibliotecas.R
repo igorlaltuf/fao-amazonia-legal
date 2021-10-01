@@ -1,8 +1,8 @@
 # Carregar bibliotecas
 library(readxl) # ler arquivos xls
 library(tidyverse) # manipulação de dados
-library(gt) # tabelas
-library(dotenv) # gerenciamento de credenciais
+library(gt) # criar tabelas
+library(dotenv) # gerenciamento de credenciais base dos dados
 library(deflateBR) # deflacionar valores
 library(lubridate) # manipular datas
 library(geobr) # baixar shapes do IBGE
@@ -18,8 +18,6 @@ library(stringi) # para remover caracteres especiais
 library(RColorBrewer) # paletas de cores
 library(ggspatial) # elementos para os mapas
 library(patchwork) # juntar gráficos na mesma figura
-library(gt) # fazer tabelas
 library(microdatasus) # carrega dados do datasus
-library(cepR) # transforma CEP em coordenadas
 
 # removi o pacote plyr porque estava dando conflito com as funções do dplyr que eu já havia utilizado

@@ -89,7 +89,7 @@ a <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('CNES vinculadas ao SUS em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados\nao SUS em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -107,7 +107,7 @@ b <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos com atendimento hospitalar \n vinculados ao SUS em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento hospitalar em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -125,7 +125,7 @@ c <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos com atendimento\nambulatorial vinculados ao SUS em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento ambulatorial em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -143,7 +143,7 @@ d <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos com atendimento de urgência\ne emergência vinculados ao SUS em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento de urgência e emergência em 2019') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -155,7 +155,7 @@ d <- ggplot() +
 (a|b)/
 (c|d)
 
-ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_não_usar_1.png', scale = 1.8)
+ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_não_usar_1.png', scale = 2.1)
 # faltam pontos das geometrias dos hospitais. Não usar!
 
 
