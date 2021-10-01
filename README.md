@@ -1,3 +1,3 @@
-# Indicadores do subconjunto agromineral energético para as cidades intermediárias da Amazônia Legal
+# Indicadores do subconjunto agromineral energético para as cidades intermediárias do desenvolvimento na Amazônia Legal
 </br>
 Este repositório faz parte do projeto da FAO-ONU em parceria com o MDR e tem como intuito identificar quais dos 773 municípios estudados - entre eles, as cidades intermediárias do desenvolvimento na região - têm maior influência de atividades como agropecuária, mineração e geração de energia elétrica.

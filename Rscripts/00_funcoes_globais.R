@@ -31,7 +31,6 @@ pontuacao.criterio1 <- function(dataframe, variavel.analisada = NULL, nova.varia
     mutate(nova.variavel = ifelse(dataframe$variavel.analisada %in% c('Alto','Muito Alto'), 1,0))
 }
 
-
 # 3 - Remover acentos
 rm_accent <- function(str,pattern="all") {
   # Rotinas e funções úteis V 1.0
