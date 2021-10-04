@@ -25,8 +25,7 @@ internet.amzl.2019 <- read.csv("Outputs/00_shapes_e_dados/00_internet_anatel.csv
   summarise(acessos_2019 = sum(acessos, na.rm = TRUE)) %>%
   mutate(
     acessos_2019 = as.numeric(acessos_2019),
-    id_municipio = as.numeric(id_municipio)
-  ) %>%
+    id_municipio = as.numeric(id_municipio)) %>%
   left_join(pop.estimada.2019, by = c("id_municipio" = "cod_muni")) %>%
   select(1, 3, 2, 4) %>%
   mutate(acessos_cada_100_mil_hab = (acessos_2019 / pop_resid_estimada_2019) * 100000) %>%

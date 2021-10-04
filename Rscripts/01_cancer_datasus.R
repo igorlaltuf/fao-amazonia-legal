@@ -1,4 +1,7 @@
+####################################################################################
 # Datasus - mortalidade por município de 2005 a 2019 (excluindo 2007, pq não tem estimativa populacional)
+# Fontes: DATASUS via Base dos Dados. 
+####################################################################################
 rm(list=ls()) # limpar as variáveis carregadas
 source('Rscripts/00_bibliotecas.R')
 source('Rscripts/00_variaveis_globais.R')

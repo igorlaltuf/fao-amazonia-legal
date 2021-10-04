@@ -13,9 +13,9 @@ covid.amzl <- covid %>%
   dplyr::select(city_ibge_code,city,date,last_available_deaths,estimated_population) %>% 
   dplyr::filter(city_ibge_code %in% cidades.amazonia.legal &
                 date == '2021-08-12') %>% 
-  mutate(obitos_100_mil_ha = (last_available_deaths/estimated_population)*100000)
+  mutate(obitos_100_mil_ha = (last_available_deaths/estimated_population) * 100000)
 
-covid.amzl <- classificar.variavel(covid.amzl,'obitos_100_mil_ha','class_obit_100_mil_ha')
+covid.amzl <- classificar.variavel(covid.amzl, 'obitos_100_mil_ha', 'class_obit_100_mil_ha')
 
 intermed <- covid.amzl %>% 
             dplyr::filter(city_ibge_code %in% cidades.intermediadoras) %>% 
