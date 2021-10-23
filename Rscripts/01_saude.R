@@ -5,7 +5,6 @@ source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
-
 # 1 - CNES-ST - Dados dos estabelecimentos
 # estabelecimentos de saúde 
 
@@ -29,8 +28,8 @@ setwd('F:/Meu repositório/fao-amazonia-legal/')
 # GESPRG6E  Alta complexidade estadual = 1
 # GESPRG6M  Alta complexidade municipal = 1
 
-# Dados de dezembro de 2019
-x <- read_csv('Outputs/00_shapes_e_dados/00_cnes_st_2019.csv', col_types = c('c',rep('n',3),rep('c',3),rep('n',13)))
+# Dados de dezembro de 2015
+x <- read_csv('Outputs/00_shapes_e_dados/00_cnes_st_2015.csv', col_types = c('c',rep('n',3),rep('c',3),rep('n',13)))
 shape.cnes <- st_read('Outputs/00_shapes_e_dados/shape.cnes.amzl.shp')
 shape.cnes$cd_cnes <- as.character(shape.cnes$cd_cnes)
 
@@ -46,28 +45,9 @@ atend.ambulat <- pontos.cnes %>%
 atend.urgemerg <- pontos.cnes %>% 
   dplyr::filter(URGEMERG == 1) # Indica a existência de INSTALAÇÃO FÍSICA de URGÊNCIA/EMERGÊNCIA
 
+sum(is.na(pontos.cnes$cd_mn)) # 36 estabelecimentos sem coordenadas
 
-sum(is.na(pontos.cnes$cd_mn)) # 1110 estabelecimentos sem coordenadas 15617 estabelecimentos
-
-
-
-# cepR teste
-# x <- pontos.cnes %>% 
-#   dplyr::filter(is.na(cd_mn))
-# 
-# t <- cepR::busca_multi(token = 'colocartokenaqui', lista_ceps = x$COD_CEP)
-# write.csv2(t,'Outputs/03_mapas/cepR_pontos.csv')
-# 
-# # https://stackoverflow.com/questions/47955292/visualizing-two-or-more-data-points-where-they-overlap-ggplot-r
-# t <- t %>% 
-#   mutate(coord = st_point(c(latitude,longitude)))
-# 
-# teste <- t %>% 
-#   group_by(estado) %>% 
-#   count()
-# st_point(c(t$latitude,t$longitude))
-
-
+# As coordenadas são de 2015, por isso os dados devem ser do mesmo ano.
 
 # mapa
 shape.muni.amzl <- st_read('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
@@ -89,7 +69,7 @@ a <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados\nao SUS em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados\nao SUS em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -107,7 +87,7 @@ b <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento hospitalar em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento hospitalar em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -125,7 +105,7 @@ c <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento ambulatorial em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento ambulatorial em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -143,7 +123,7 @@ d <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento de urgência e emergência em 2019') +
+  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento de urgência e emergência em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -155,10 +135,7 @@ d <- ggplot() +
 (a|b)/
 (c|d)
 
-ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_não_usar_1.png', scale = 2.1)
-# faltam pontos das geometrias dos hospitais. Não usar!
-
-
+ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_2015.png', scale = 2.1)
 
 
 # POR TIPO DE ATENDIMENTO

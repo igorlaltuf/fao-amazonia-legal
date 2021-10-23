@@ -66,15 +66,15 @@ var.cnes.st <- c('CNES','CODUFMUN','COD_CEP','VINC_SUS','TPGESTAO','TP_UNID','TU
                  'GESPRG1M','GESPRG2E','GESPRG2M','GESPRG4E','GESPRG4M','GESPRG5E','GESPRG5M', 
                  'GESPRG6E','GESPRG6M','NIVATE_A','NIVATE_H','URGEMERG')
 
-x <- fetch_datasus(year_start = 2019,
-                   year_end = 2019, 
+x <- fetch_datasus(year_start = 2015,
+                   year_end = 2015, 
                    month_start = 12, 
                    month_end = 12, 
                    uf = uf.amz.legal, 
                    information_system = "CNES-ST", 
                    vars = var.cnes.st)
 
-write.csv(x,'Outputs/00_shapes_e_dados/00_cnes_st_2019.csv', row.names = F)
+write.csv(x,'Outputs/00_shapes_e_dados/00_cnes_st_2015.csv', row.names = F)
 
 # 2 - Dados de Leitos
 var.cnes.lt <- c('CNES','CODUFMUN','TP_UNID','TP_LEITO','CODLEITO','QT_EXIST','QT_CONTR','QT_SUS','QT_NSUS')
