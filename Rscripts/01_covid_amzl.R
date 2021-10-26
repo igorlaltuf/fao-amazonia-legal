@@ -66,6 +66,12 @@ gtsave(tabela.covid, 'Outputs/03_mapas/Saúde/tabela_covid_intermediadoras.png')
 shape.muni.amzl <- read_sf('Outputs/00_shapes_e_dados/shape.muni.amzl.shp')
 shape.muni.amzl <- left_join(covid.amzl,shape.muni.amzl, by = c('city_ibge_code'='cd_mn'))
 
+# transforma character em factors
+shape.muni.amzl$class_obit_100_mil_ha <- as.factor(shape.muni.amzl$class_obit_100_mil_ha)
+# define a ordem dos factors (em 6 níveis)
+shape.muni.amzl$class_obit_100_mil_ha <- factor(shape.muni.amzl$class_obit_100_mil_ha, levels = c('Muito Alto','Alto','Médio Alto','Médio Baixo','Baixo','Muito Baixo'))
+
+
 # coord dos pontos
 coord.cidades <- st_read('Outputs/00_shapes_e_dados/coord.cidades.shp')
 
