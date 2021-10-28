@@ -36,21 +36,24 @@ datasus.amzl <- datasus %>%
 datasus.amzl <- left_join(datasus.amzl,cidades.amazonia.legal.nome, by = c('id_municipio'='cod_muni')) %>% 
   select(1,2,5,3,4)
 
-# Importar estimativas populacionais de 2005 a 2019 e dados do censo de 2010
+# Importar estimativas populacionais de 2005 a 2019, dados do censo de 2010 e da contagem de 2007
+# contagem 2007 https://www.ibge.gov.br/estatisticas/sociais/habitacao/9065-contagem-da-populacao.html?edicao=10189&t=resultados
 pop.2010 <- read_excel('Input/tabela202.xlsx', skip = 4) %>% select(1,2,4)
 pop.2005.2019 <- read_excel('Input/tabela6579.xlsx', skip = 3)
+pop.2007 <- read_excel('Input/popmunic2007layoutTCU14112007.xls', skip = 2, range = 'A3:E5567') %>% janitor::clean_names() %>% unite("cod_muni", 2:3,sep = '') %>% rename('2007' = 'populacoes')
 
 populacao <- left_join(pop.2005.2019,pop.2010) %>% 
-  select(1:10,21,11:20) 
-
+  select(1:10,21,11:20)  
+ 
 colnames(populacao)[1] <- 'cod_muni'
 colnames(populacao)[2] <- 'muni'
 
-populacao <- populacao %>% 
+populacao <-left_join(populacao, pop.2007) %>% 
+  select(1:8,24,9:21) %>% 
   dplyr::filter(cod_muni %in% cidades.amazonia.legal)
 
 # converter em numeric
-populacao[3:21] <- lapply(populacao[3:21], as.numeric)
+populacao[3:22] <- lapply(populacao[3:22], as.numeric)
 
 # descobrir quantos NAs existem em cada coluna do Dataframe
 sapply(populacao, function(x) sum(is.na(x)))
@@ -58,6 +61,9 @@ sapply(populacao, function(x) sum(is.na(x)))
 # reorganizar dataframe como se fosse uma tabela dinâmica
 populacao <- populacao %>% 
   pivot_longer(!c(cod_muni,muni), names_to = "ano", values_to = "populacao")
+
+# exportar csv com dados populacionais
+write.csv(populacao,'Outputs/00_shapes_e_dados/populacao_amzl_2001-20.csv',row.names = F)
 
 
 tabela <- left_join(datasus.amzl,populacao,by=c('muni','ano')) %>% 
