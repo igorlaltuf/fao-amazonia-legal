@@ -220,7 +220,14 @@ a <- ggplot() +
   scale_fill_manual(values = brewer.pal(6, "Greens")) + 
   theme_classic()+
   labs(fill = 'Valor da produção') +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  annotation_scale(location = 'br') +
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering(),
+                         height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         pad_y = unit(.25, "cm"),
+                         pad_x = unit(-.12, "cm"))
 
 
 # Cacau
@@ -231,7 +238,14 @@ b <- ggplot() +
   scale_fill_manual(values = brewer.pal(6, "Greens")) + 
   theme_classic()+
   labs(fill = 'Valor da produção') +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  annotation_scale(location = 'br') +
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering(),
+                         height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         pad_y = unit(.25, "cm"),
+                         pad_x = unit(-.12, "cm"))
 
 # Cupuaçu
 c <- ggplot() +
@@ -241,7 +255,14 @@ c <- ggplot() +
   scale_fill_manual(values = brewer.pal(6, "Greens")) + 
   theme_classic()+
   labs(fill = 'Valor da produção') +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  annotation_scale(location = 'br') +
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering(),
+                         height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         pad_y = unit(.25, "cm"),
+                         pad_x = unit(-.12, "cm"))
 
 # Açaí
 d <- ggplot() +
@@ -251,15 +272,23 @@ d <- ggplot() +
   scale_fill_manual(values = brewer.pal(6, "Greens")) + 
   theme_classic()+
   labs(fill = 'Valor da produção') +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  annotation_scale(location = 'br') +
+  annotation_north_arrow(location='tl', 
+                         style = north_arrow_fancy_orienteering(),
+                         height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         pad_y = unit(.25, "cm"),
+                         pad_x = unit(-.12, "cm"))
+                         
 
 
 (a|b)/
-(c|d) + plot_layout(guides = 'collect')
+(c|d) + plot_layout(guides = 'collect') & theme(legend.position = 'bottom') # precisa usar o & nesse caso para mandar a legenda para baixo
 
 
 # salva o mapa Cacau
-ggsave(path = 'Outputs/03_mapas/bioeconomia/bioeconomia_amzl.png', width = 9, height = 6)
+ggsave(path = 'Outputs/03_mapas/bioeconomia/', filename = 'bioeconomia_amzl.png', width = 9, height = 6)
 
 
 
