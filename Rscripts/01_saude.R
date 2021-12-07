@@ -63,13 +63,13 @@ shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 a <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
-  geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'CNES'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
-  scale_color_manual(values = c("CNES" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
+  geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'Estabelecimentos\nde saúde'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
+  scale_color_manual(values = c("Estabelecimentos\nde saúde" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados\nao SUS em 2015') +
+  #ggtitle('Estabelecimentos de saúde vinculados\nao SUS em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -87,7 +87,7 @@ b <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento hospitalar em 2015') +
+  #ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento hospitalar em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -105,7 +105,7 @@ c <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento ambulatorial em 2015') +
+  #ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento ambulatorial em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -123,7 +123,7 @@ d <- ggplot() +
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
   labs(x = NULL, y = NULL) + #Muda o nome da legenda com o fill.
-  ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento de urgência e emergência em 2015') +
+  #ggtitle('Estabelecimentos de saúde vinculados ao SUS\ncom atendimento de urgência e emergência em 2015') +
   coord_sf(crs = 4674) +
   annotation_scale(location = 'br')+
   annotation_north_arrow(location = 'tl', 
@@ -132,11 +132,10 @@ d <- ggplot() +
   theme(legend.position = 'bottom',
         plot.title = element_text(hjust = 0.5))
 
-(a|b)/
-(c|d)
+(a|c)/
+(b|d)
 
-ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_2015.png', scale = 2.1)
-
+ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_2015.png', scale = 1.3, width = 9, height = 6)
 
 # POR TIPO DE ATENDIMENTO
 # atendimento de urgência e emergência
