@@ -283,12 +283,19 @@ d <- ggplot() +
                          
 
 
-(a|b)/
-(c|d) + plot_layout(guides = 'collect') & theme(legend.position = 'bottom') # precisa usar o & nesse caso para mandar a legenda para baixo
+(d|b)/
+(c|a) + plot_layout(guides = 'collect') & theme(legend.position = 'bottom') # precisa usar o & nesse caso para mandar a legenda para baixo
 
 
 # salva o mapa Cacau
 ggsave(path = 'Outputs/03_mapas/bioeconomia/', filename = 'bioeconomia_amzl.png', width = 9, height = 6)
+
+
+
+
+
+
+
 
 
 
