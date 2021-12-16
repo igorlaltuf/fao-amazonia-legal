@@ -166,8 +166,6 @@ grafico +
 
 ggsave('Outputs/03_mapas/Outros/frequencia_saídas_hidro_breves.png')
 
-
-
 # Rodovias 2016 
 origem_intermed_lines <- shape %>% 
   dplyr::filter(codmundv_a %in% cid_inter & var04 <= tempo & var03 <= custo & var06 > rodo) 
