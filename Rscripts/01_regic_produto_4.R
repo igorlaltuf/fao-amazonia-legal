@@ -1,5 +1,7 @@
+rm(list=ls()) # limpar as variáveis carregadas
 # REGIC Mapas estáticos
 source('Rscripts/00_funcoes_globais.R')
+source('Rscripts/00_variaveis_globais.R')
 # Carregar bibliotecas
 library(geobr)
 library(sf)
@@ -10,8 +12,8 @@ library(ggspatial)
 library(RColorBrewer)
 library(ggrepel) # impede que as labels do ggplot se sobreponham
 library(stringr) # para usar a função str_replace_all()
+library(sidrar)
 
-rm(list=ls()) # limpar as variáveis carregadas
 options(scipen=999)
 sf_use_s2(F) # permite que o sf fucione como na versão anterior
 
@@ -36,18 +38,60 @@ pontos <- cidades.ponto %>%
 shape.selec <- st_intersection(amzl, shape.estados)
 
 
+# pegar dados do IBGE
+info_sidra(1384) 
+dados.norte <- get_sidra(x = 1384, 
+                         geo = 'City',
+                         geo.filter = list("Region" = 1),
+                         variable = 1000140)
+
+dados.nordeste <- get_sidra(x = 1384, 
+                            geo = 'City',
+                            geo.filter = list("Region" = 2),
+                            variable = 1000140)
+
+dados.co <- get_sidra(x = 1384, 
+                      geo = 'City',
+                      geo.filter = list("Region" = 5),
+                      variable = 1000140)
+
+dados.ibge <- rbind(dados.norte,dados.nordeste,dados.co)
+
+x <- read_municipality()
+
+ate.um.sm <- dados.ibge %>% 
+  janitor::clean_names() %>% 
+  dplyr::filter(classes_de_rendimento_nominal_mensal_codigo %in% c(92980,92973,92974),
+                municipio_codigo %in% cidades.amazonia.legal) %>% 
+  unique() %>% 
+  select(7,6,9,13,4,5) %>% 
+  group_by(municipio, municipio_codigo) %>% 
+  summarise(percent_ate_1_sm = sum(valor)) %>%
+  mutate(municipio_codigo = as.numeric(municipio_codigo)) %>% 
+  left_join(x, by = c('municipio_codigo'='code_muni')) 
+
+mycolors <- brewer.pal(9,'Greens')
+
 saude <- ggplot() +
-  geom_sf(data = shape.selec, fill = NA) +
+  geom_sf(data = shape.selec) +
+  geom_sf(data = ate.um.sm, aes(fill = percent_ate_1_sm, geometry = geom), color = NA) +
   geom_sf(data = ligacoes.s, aes(color = quest_4)) +
   geom_sf(data = pontos, size = .1) +
-  scale_color_manual(values = c("#f03b20","#feb24c","#ffeda0"))+
+  scale_color_manual(values = c("#f03b20","#feb24c","#ffeda0")) + # cor das ligações
+  scale_fill_gradientn(colors = mycolors,
+                       breaks = c(40,60,80,100),
+                       limits = c(40,100),
+                       labels = c("40","60","80","100")
+                       ) +
+  labs(fill = 'Percentual com\nrenda até 1 SM')+
   annotation_scale(location = 'br') +
   annotation_north_arrow(location='tl', 
-                         style = north_arrow_fancy_orienteering())+
+                         style = north_arrow_fancy_orienteering()) +
   theme_classic() + # retira o grid e coloca o fundo branco
+  labs(color = 'Ordem de\nfrequência') +
   theme(legend.position = 'bottom',
-        legend.title = element_text(vjust = 2))+
-  labs(color = 'Ordem de\nfrequência') 
+        legend.title = element_text(vjust = 1)) # ajuste na altura da legenda
+ 
 
 saude
 ggsave(saude,filename = 'Outputs/03_mapas/Saúde/regic_alta_complexidade.png', width = 9, height = 6)
