@@ -16,6 +16,7 @@ cnae.cidades <- read_csv('Outputs/00_shapes_e_dados/00_rais_ativos_2019.csv',
 which(is.na(cnae.cidades$vinculos_ativos)) # retorna a linha dos NAs caso existam
 cnae.cidades$id_municipio <- as.numeric(cnae.cidades$id_municipio)
 
+
 # código CNAE
 # 06 Extração de petróleo e gás natural
 cnae.petroleo <- cnae.cidades %>% 
