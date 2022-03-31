@@ -70,14 +70,14 @@ ate.um.sm <- dados.ibge %>%
   mutate(municipio_codigo = as.numeric(municipio_codigo)) %>% 
   left_join(x, by = c('municipio_codigo'='code_muni')) 
 
-mycolors <- brewer.pal(9,'Greens')
+mycolors <- brewer.pal(9,'Greys')
 
 saude <- ggplot() +
   geom_sf(data = shape.selec) +
   geom_sf(data = ate.um.sm, aes(fill = percent_ate_1_sm, geometry = geom), color = NA) +
   geom_sf(data = ligacoes.s, aes(color = quest_4)) +
   geom_sf(data = pontos, size = .1) +
-  scale_color_manual(values = c("#f03b20","#feb24c","#ffeda0")) + # cor das ligações
+  scale_color_manual(values = c("#f0f0f0","#bdbdbd","#636363")) + # cor das ligações
   scale_fill_gradientn(colors = mycolors,
                        breaks = c(40,60,80,100),
                        limits = c(40,100),
@@ -94,12 +94,19 @@ saude <- ggplot() +
  
 
 saude
-ggsave(saude,filename = 'Outputs/03_mapas/Saúde/regic_alta_complexidade.png', width = 9, height = 6)
+ggsave(saude,filename = 'Outputs/03_mapas/Saúde/regic_alta_complexidade_grey.png', width = 9, height = 6, dpi = 600)
 
 
 dest.saude <- ligacoes.s %>% 
   select('nome_dest') %>% 
   count(nome_dest)
+
+#### ligações com manaus
+ligacoes.manaus <- ligacoes.s %>% 
+  dplyr::filter(cod_dest %in% '1302603')
+
+mean(ligacoes.manaus$dist_km) # distância média dos municípios da REGIC de saúde de Manaus 
+
 
 ########### ligações de transporte público
 ligacoes.tp <- ligacoes.regic %>% 
@@ -112,6 +119,15 @@ ggplot() +
   geom_sf(data = pontos, size = .1)
 
 
+########### ligações de transporte público em Manaus
+ligacoes.tp.manaus <- ligacoes.regic %>% 
+  dplyr::filter(cod_dest %in% '1302603',
+                quest_10 > 0)
+
+ggplot() +
+  geom_sf(data = amzl) +
+  geom_sf(data = ligacoes.tp.manaus) +
+  geom_sf(data = pontos, size = .1)
 
 ############ ligações agropecuárias de qualquer tipo para culturas selecionadas da sociobioeconomia
 # obs: Alguns shapes estão faltando.

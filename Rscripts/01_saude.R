@@ -57,6 +57,9 @@ shape.hidrovia <- read_sf('Input/shapes logística/hidrovias/Hidrovias.shp') %>%
 sf_use_s2(FALSE)
 shape.hidrovia <- st_intersection(shape.estad.amzl,shape.hidrovia)
 
+cor.estab <- "#636363"
+cor.hidrov <- "#bdbdbd"
+
 # Todos os casos tem vínculo com sus
 # dados de 2015 dos pontos
 # CNES com vínculo com SUS
@@ -64,7 +67,7 @@ a <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = pontos.cnes, aes(geometry = geometry, col = 'Estabelecimentos\nde saúde'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimentos\nde saúde" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
+  scale_color_manual(values = c("Estabelecimentos\nde saúde" = alpha(cor.estab, 0.7), "Hidrovias navegáveis" = cor.hidrov),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -82,7 +85,7 @@ b <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.hospitalar, aes(geometry = geometry, col = 'Estabelecimento com\natendimento hospitalar'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com\natendimento hospitalar" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
+  scale_color_manual(values = c("Estabelecimento com\natendimento hospitalar" = alpha(cor.estab,0.7), "Hidrovias navegáveis" = cor.hidrov),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -100,7 +103,7 @@ c <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.ambulat, aes(geometry = geometry, col = 'Estabelecimento com\natendimento ambulatorial'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com\natendimento ambulatorial" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
+  scale_color_manual(values = c("Estabelecimento com\natendimento ambulatorial" = alpha(cor.estab,0.7), "Hidrovias navegáveis" = cor.hidrov),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -118,7 +121,7 @@ d <- ggplot() +
   geom_sf(data = shape.estad.amzl, aes(geometry = geometry), fill = NA) +
   geom_sf(data = shape.hidrovia, aes(col = 'Hidrovias navegáveis'), size = 0.4, show.legend = 'line') +
   geom_sf(data = atend.urgemerg, aes(geometry = geometry, col = 'Estabelecimento com atendimento\nde urgência e emergência'), stat = "sf_coordinates", size = .1, show.legend = 'point') +
-  scale_color_manual(values = c("Estabelecimento com atendimento\nde urgência e emergência" = alpha("#d95f0e",0.7), "Hidrovias navegáveis" = "#2b8cbe"),
+  scale_color_manual(values = c("Estabelecimento com atendimento\nde urgência e emergência" = alpha(cor.estab,0.7), "Hidrovias navegáveis" = cor.hidrov),
                      name = NULL,
                      guide = guide_legend(override.aes = list(linetype=c("blank", "solid"),
                                                               shape=c(16, NA)))) +
@@ -135,7 +138,7 @@ d <- ggplot() +
 (a|c)/
 (b|d)
 
-ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_2015.png', scale = 1.3, width = 9, height = 6)
+ggsave('Outputs/03_mapas/Saúde/03_cnes_pontos_amzl_2015_grey.png', scale = 1.3, width = 9, height = 6, dpi = 600)
 
 # POR TIPO DE ATENDIMENTO
 # atendimento de urgência e emergência

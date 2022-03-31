@@ -39,6 +39,35 @@ query <- "SELECT ano,sigla_uf,id_municipio,rede,id_escola,quantidade_matriculas 
 df <- read_sql(query)
 write.csv(df,'Outputs/00_shapes_e_dados/00_base_matriculas_2009_2020.csv', row.names = F)
 
+
+
+# Abaixo foram filtrados os docentes de escolas públicas que trabalharam nos 20 municípios que mais receberam recursos via royalties cfm e cfh.
+# INEP - Censo Escolar - Professores escolas públicas CFM
+query <- "SELECT id_municipio, id_escola, ano, sigla_uf, rede FROM `basedosdados.br_inep_censo_escolar.docente`
+          WHERE sigla_uf IN ('AC', 'RR', 'AM', 'RO', 'PA', 'AP', 'MA', 'TO', 'MT') AND
+          rede IN ('municipal','estadual','federal') AND
+          id_municipio IN ('1505536','1502152','1504208','1505304','1505502','1503903','1503457',
+                           '1600154','1507979','1303536','1502772','5105903','1600808','1503606',
+                           '5105507','1507300','1100023','1503044','1100205','2104305')"
+df <- read_sql(query)
+write.csv(df,'Outputs/00_shapes_e_dados/00_base_docentes_cfm_2009_2020.csv', row.names = F)
+
+
+
+# INEP - Censo Escolar - Professores escolas públicas CFH
+query <- "SELECT id_municipio, id_escola, ano, sigla_uf, rede FROM `basedosdados.br_inep_censo_escolar.docente`
+          WHERE sigla_uf IN ('AC', 'RR', 'AM', 'RO', 'PA', 'AP', 'MA', 'TO', 'MT') AND
+          rede IN ('municipal','estadual','federal') AND
+          id_municipio IN ('1505064','1100205','1508100','1503093','1503804','1501782','1718204','5104609',
+                           '1503705','1500602','5106299','1716208','1508357','1303536','1504976','1600238',
+                           '1721000','2102804','5101407','5103007')"
+          
+df <- read_sql(query)
+write.csv(df,'Outputs/00_shapes_e_dados/00_base_docentes_cfh_2009_2020.csv', row.names = F)
+
+
+
+
 # RAIS - Vínculos ativos em 31-12-2019 por município de acordo com a CNAE 2.0
 query <- "SELECT id_municipio, ano, cnae_2, SUM(numero_vinculos) as vinculos_ativos FROM `basedosdados.br_me_rais.agregado_vinculos_municipio_vinculo_ativo_cbo_cnae_natureza_juridica_idade_sexo_raca`
           WHERE ano = 2019 AND vinculo_ativo_3112 = 1
