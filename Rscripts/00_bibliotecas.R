@@ -7,6 +7,7 @@ library(deflateBR) # deflacionar valores
 library(lubridate) # manipular datas
 library(geobr) # baixar shapes do IBGE
 library(basedosdados) # acessar dados da RAIS
+library(udunits2) # precisa para iniciar o pacote sf no renv
 library(sf) # Ler shapefiles
 library(nngeo) # pacote para remover buracos quando uso st_union em shapefiles
 library(ggspatial) 

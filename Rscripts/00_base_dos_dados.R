@@ -8,7 +8,18 @@ setwd('F:/Meu repositório/fao-amazonia-legal/')
 # credenciais do data lake base dos dados
 load_dot_env()
 credencial <- Sys.getenv('CREDENCIAL_BASE_DOS_DADOS')
-basedosdados::set_billing_id(credencial)   
+basedosdados::set_billing_id(credencial) 
+
+# CAGED Teresópolis
+query <- "SELECT id_municipio, ano, quantidade_vinculos_ativos, cnae_2, cnae_2_subclasse, subsetor_ibge, tamanho,natureza_juridica, tipo, cep  FROM `basedosdados.br_me_rais.microdados_estabelecimentos`
+          WHERE id_municipio IN ('3305802') AND
+          quantidade_vinculos_ativos >= 1 AND
+          ano IN (2019)"
+
+df <- read_sql(query)
+write.csv(df, 'Outputs/00_shapes_e_dados/tere_rais_estab_2019.csv', row.names = F)
+
+
 
 # ANATEL
 query <- "SELECT ano, sigla_uf, id_municipio, empresa, sinal, produto, SUM(acessos) as acessos FROM `basedosdados.br_anatel_telefonia_movel.municipio`
