@@ -5,13 +5,15 @@ source('Rscripts/00_variaveis_globais.R')
 source('Rscripts/00_funcoes_globais.R')
 setwd('F:/Meu repositório/fao-amazonia-legal/')
 
+
+
 # Carregar tabelas output
-empregos.rais.energia <- read.csv('Outputs/01_tabelas/01_empregos_rais.csv')
-royalties.energia <- read.csv('Outputs/01_tabelas/01_royalties_mineracao_energia.csv')
-bndes <- read.csv('Outputs/01_tabelas/01_financ_bndes.csv') 
-vab.energia <- read.csv('Outputs/01_tabelas/01_vab_energia_2017.csv')
-infra.energia <- read.csv('Outputs/01_tabelas/01_geracao_energia_amzl.csv')
-desmatamento <- read.csv('Outputs/01_tabelas/01_desmatamento_bacias_energia.csv')
+empregos.rais.energia <- read_csv('Outputs/01_tabelas/01_empregos_rais.csv', locale = locale(encoding = "latin1"))
+royalties.energia <- read_csv('Outputs/01_tabelas/01_royalties_mineracao_energia.csv', locale = locale(encoding = "latin1"))
+bndes <- read_csv('Outputs/01_tabelas/01_financ_bndes.csv', locale = locale(encoding = "latin1")) 
+vab.energia <- read_csv('Outputs/01_tabelas/01_vab_energia_2017.csv', locale = locale(encoding = "latin1"))
+infra.energia <- read_csv('Outputs/01_tabelas/01_geracao_energia_amzl.csv', locale = locale(encoding = "latin1"))
+desmatamento <- read_csv('Outputs/01_tabelas/01_desmatamento_bacias_energia.csv', locale = locale(encoding = "latin1"))
 
 # Empregos Energia
 empregos.rais.energia <- empregos.rais.energia %>% 
@@ -36,14 +38,18 @@ desmatamento <- desmatamento %>%
   mutate(desmatamento_bacias = ifelse(desmatamento$class_hidro %in% c('Alto','Muito Alto'), 1,0))
 
 
+# O ERRO ESTÁ NESSE SCRIPT A PARTIR DAQUI!!!!
+# Tucuruí tem hidrelétrica, mas não está mostrando. PQ????
+
 # Juntar tabela
-sintese.energia <- full_join(empregos.rais.energia, royalties.energia, by = c('cod_muni','muni'))
+sintese.energia <- full_join(royalties.energia,empregos.rais.energia, by = c('muni', 'cod_muni'))
 sintese.energia <- left_join(sintese.energia, bndes.energia, by = 'cod_muni')
-sintese.energia <- left_join(sintese.energia, infra.energia, by = c('cod_muni','muni'))
+sintese.energia <- left_join(sintese.energia, infra.energia, by = 'cod_muni')
 sintese.energia <- left_join(sintese.energia, desmatamento, by = 'cod_muni')
 
 sintese.energia <- sintese.energia %>% 
-                   select('cod_muni','muni','pont_empregos_energia','royalties_cfh','energia_bndes','existe_UTE','existe_UHE_PCH','desmatamento_bacias')
+                   select('cod_muni','muni.x','pont_empregos_energia','royalties_cfh','energia_bndes','existe_UTE','existe_UHE_PCH','desmatamento_bacias') %>% 
+                   rename(muni = muni.x)
 
 colnames(sintese.energia)[5] <- 'pont_financ_bndes'
 colnames(sintese.energia)[8] <- 'pont_desm_bacia'
@@ -53,7 +59,7 @@ sintese.energia <- sintese.energia %>%
                    mutate(total_energia = pont_empregos_energia + royalties_cfh + pont_financ_bndes + existe_UTE + existe_UHE_PCH + pont_desm_bacia)
 
 # Exportar tabela
-write.csv(sintese.energia, file='Outputs/02_tabelas/02_subconjunto_energia.csv', row.names = F)
+write.csv(sintese.energia, file='Outputs/02_tabelas/02_subconjunto_energia.csv', row.names = F, fileEncoding = 'Latin1')
 
 x <- sintese.energia %>% 
   dplyr::filter(cod_muni %in% cidades.intermediadoras) %>% 

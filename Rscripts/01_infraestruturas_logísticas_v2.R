@@ -291,7 +291,7 @@ infra.logistica[is.na(infra.logistica)] <- 0
 
 # aqui as duas últimas coluna sintetizam os valores de agro e mineração, caso um município tenha apresentado pelo menos um tipo de infraestrutura
 infra.logistica <- infra.logistica %>% 
-                   mutate(infra_agro = ifelse(porto_agro+existe_armazem+ferrov_agro>0,1,0)) %>% 
+                   mutate(infra_agro = ifelse(porto_agro + existe_armazem + ferrov_agro > 0, 1, 0)) %>% 
                    mutate(infra_mineral = ifelse(porto_mineracao+ferrov_mineral>0,1,0))  
 
 # É o recorte das duas últimas colunas acima.

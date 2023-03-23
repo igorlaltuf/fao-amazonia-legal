@@ -20,8 +20,11 @@ colnames(infra.energetica) <- c(
 infra.energetica.bacias <- infra.energetica %>%
   dplyr::filter(uf %in% uf.amz.legal &
     fonte %in% c("PCH", "UHE") & # filtra apenas PCHs e UHEs
-    fase == "Operação") %>% # apenas exclui as que estão em obras ou ainda são um projeto
-  filter(!is.na(cod_e_desc_sub_bacia)) # retorna as linhas que não têm NA
+    fase == "Operação") # apenas exclui as que estão em obras ou ainda são um projeto
+  
+  #filter(!is.na(cod_e_desc_sub_bacia)) # retorna as linhas que não têm NA O ERRO ESTÁ AQUI!!!!!!!!!!!!!
+
+
 
 # dividir colunas com dois municípios em três colunas
 infra.energetica.bacias$muni1 <- str_split_fixed(infra.energetica.bacias$muni, ",", 3)[, 1]
