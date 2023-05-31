@@ -1,3 +1,7 @@
+
+# Obs: mais dados da regic estão no diretório E:\Documentos pessoais\Análise de dados\Scripts R\PASSAR PARA REPOSITÓRIO FAO\Regic ligações
+
+
 rm(list=ls()) # limpar as variáveis carregadas
 # REGIC Mapas estáticos
 source('Rscripts/00_funcoes_globais.R')
